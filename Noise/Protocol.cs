@@ -15,7 +15,7 @@ namespace Noise
         /// <summary>
         /// Maximum size of the Noise protocol message in bytes.
         /// </summary>
-        public static int MaxMessageLength = 1073741824;//65535;
+        public static int MaxMessageLength = 65535;
 
 		/// <summary>
 		/// Minimum size of the protocol name in bytes.
