@@ -15,7 +15,7 @@ namespace Noise
         /// <summary>
         /// Maximum size of the Noise protocol message in bytes.
         /// </summary>
-        public int MaxMessageLength = 1073741824;//65535;
+        public static int MaxMessageLength = 1073741824;//65535;
 
 		/// <summary>
 		/// Minimum size of the protocol name in bytes.
@@ -238,7 +238,7 @@ namespace Noise
 			}
 
 			var next = splitter.Next();
-			var pattern = next.Length > 1 && Char.IsUpper(next[1]) ? next.Slice(0, 2) : next.Slice(0, 1);
+			var pattern = next.Length > 1 && char.IsUpper(next[1]) ? next.Slice(0, 2) : next.Slice(0, 1);
 
 			var handshakePattern = ParseHandshakePattern(pattern);
 			var modifiers = ParseModifiers(next.Slice(pattern.Length));
@@ -324,7 +324,7 @@ namespace Noise
 
 			if (Modifiers != PatternModifiers.None)
 			{
-				var separator = String.Empty;
+				var separator = string.Empty;
 
 				foreach (PatternModifiers modifier in Enum.GetValues(typeof(PatternModifiers)))
 				{
@@ -354,7 +354,7 @@ namespace Noise
 		private ref struct StringSplitter
 		{
 			private ReadOnlySpan<char> s;
-			private char separator;
+			private readonly char separator;
 
 			public StringSplitter(ReadOnlySpan<char> s, char separator)
 			{
