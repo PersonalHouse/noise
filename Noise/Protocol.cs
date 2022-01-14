@@ -12,10 +12,10 @@ namespace Noise
 	/// </summary>
 	public sealed class Protocol
 	{
-		/// <summary>
-		/// Maximum size of the Noise protocol message in bytes.
-		/// </summary>
-		public const int MaxMessageLength = 65535;
+        /// <summary>
+        /// Maximum size of the Noise protocol message in bytes.
+        /// </summary>
+        public int MaxMessageLength = 1073741824;//65535;
 
 		/// <summary>
 		/// Minimum size of the protocol name in bytes.
