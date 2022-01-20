@@ -45,69 +45,83 @@ namespace Noise
 		/// </exception>
 		void Fallback(Protocol protocol, ProtocolConfig config);
 
-		/// <summary>
-		/// Performs the next step of the handshake,
-		/// encrypts the <paramref name="payload"/>,
-		/// and writes the result into <paramref name="messageBuffer"/>.
-		/// The result is undefined if the <paramref name="payload"/>
-		/// and <paramref name="messageBuffer"/> overlap.
-		/// </summary>
-		/// <param name="payload">The payload to encrypt.</param>
-		/// <param name="messageBuffer">The buffer for the encrypted message.</param>
-		/// <returns>
-		/// The tuple containing the ciphertext size in bytes,
-		/// the handshake hash, and the <see cref="Transport"/>
-		/// object for encrypting transport messages. If the
-		/// handshake is still in progress, the handshake hash
-		/// and the transport will both be null.
-		/// </returns>
-		/// <exception cref="ObjectDisposedException">
-		/// Thrown if the current instance has already been disposed.
-		/// </exception>
-		/// <exception cref="InvalidOperationException">
-		/// Thrown if the call to <see cref="ReadMessage"/> was expected
-		/// or the handshake has already been completed.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		/// Thrown if the output was greater than <see cref="Protocol.MaxMessageLength"/>
-		/// bytes in length, or if the output buffer did not have enough space to hold the ciphertext.
-		/// </exception>
-		(int BytesWritten, byte[] HandshakeHash, Transport Transport) WriteMessage(
+        /// <summary>
+        /// Get encrypted message size
+        /// </summary>
+        /// <param name="payloadSize">The payload size</param>
+        /// <returns>The encrypted message size</returns>
+        int GetEncryptedMessageSize(int payloadSize);
+        /// <summary>
+        /// Performs the next step of the handshake,
+        /// encrypts the <paramref name="payload"/>,
+        /// and writes the result into <paramref name="messageBuffer"/>.
+        /// The result is undefined if the <paramref name="payload"/>
+        /// and <paramref name="messageBuffer"/> overlap.
+        /// </summary>
+        /// <param name="payload">The payload to encrypt.</param>
+        /// <param name="messageBuffer">The buffer for the encrypted message.</param>
+        /// <returns>
+        /// The tuple containing the ciphertext size in bytes,
+        /// the handshake hash, and the <see cref="Transport"/>
+        /// object for encrypting transport messages. If the
+        /// handshake is still in progress, the handshake hash
+        /// and the transport will both be null.
+        /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the current instance has already been disposed.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the call to <see cref="ReadMessage"/> was expected
+        /// or the handshake has already been completed.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the output was greater than <see cref="Protocol.MaxMessageLength"/>
+        /// bytes in length, or if the output buffer did not have enough space to hold the ciphertext.
+        /// </exception>
+        (int BytesWritten, byte[] HandshakeHash, Transport Transport) WriteMessage(
 			ReadOnlySpan<byte> payload,
 			Span<byte> messageBuffer
 		);
 
-		/// <summary>
-		/// Performs the next step of the handshake,
-		/// decrypts the <paramref name="message"/>,
-		/// and writes the result into <paramref name="payloadBuffer"/>.
-		/// The result is undefined if the <paramref name="message"/>
-		/// and <paramref name="payloadBuffer"/> overlap.
-		/// </summary>
-		/// <param name="message">The message to decrypt.</param>
-		/// <param name="payloadBuffer">The buffer for the decrypted payload.</param>
-		/// <returns>
-		/// The tuple containing the plaintext size in bytes,
-		/// the handshake hash, and the <see cref="Transport"/>
-		/// object for encrypting transport messages. If the
-		/// handshake is still in progress, the handshake hash
-		/// and the transport will both be null.
-		/// </returns>
-		/// <exception cref="ObjectDisposedException">
-		/// Thrown if the current instance has already been disposed.
-		/// </exception>
-		/// <exception cref="InvalidOperationException">
-		/// Thrown if the call to <see cref="WriteMessage"/> was expected
-		/// or the handshake has already been completed.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		/// Thrown if the message was greater than <see cref="Protocol.MaxMessageLength"/>
-		/// bytes in length, or if the output buffer did not have enough space to hold the plaintext.
-		/// </exception>
-		/// <exception cref="System.Security.Cryptography.CryptographicException">
-		/// Thrown if the decryption of the message has failed.
-		/// </exception>
-		(int BytesRead, byte[] HandshakeHash, Transport Transport) ReadMessage(
+
+        /// <summary>
+        /// Get decrypted message size
+        /// </summary>
+        /// <param name="msgSize">encrypted message size</param>
+        /// <returns>decrypted message size</returns>
+        int GetDecryptedMessageSize(int msgSize);
+
+        /// <summary>
+        /// Performs the next step of the handshake,
+        /// decrypts the <paramref name="message"/>,
+        /// and writes the result into <paramref name="payloadBuffer"/>.
+        /// The result is undefined if the <paramref name="message"/>
+        /// and <paramref name="payloadBuffer"/> overlap.
+        /// </summary>
+        /// <param name="message">The message to decrypt.</param>
+        /// <param name="payloadBuffer">The buffer for the decrypted payload.</param>
+        /// <returns>
+        /// The tuple containing the plaintext size in bytes,
+        /// the handshake hash, and the <see cref="Transport"/>
+        /// object for encrypting transport messages. If the
+        /// handshake is still in progress, the handshake hash
+        /// and the transport will both be null.
+        /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the current instance has already been disposed.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the call to <see cref="WriteMessage"/> was expected
+        /// or the handshake has already been completed.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the message was greater than <see cref="Protocol.MaxMessageLength"/>
+        /// bytes in length, or if the output buffer did not have enough space to hold the plaintext.
+        /// </exception>
+        /// <exception cref="System.Security.Cryptography.CryptographicException">
+        /// Thrown if the decryption of the message has failed.
+        /// </exception>
+        (int BytesRead, byte[] HandshakeHash, Transport Transport) ReadMessage(
 			ReadOnlySpan<byte> message,
 			Span<byte> payloadBuffer
 		);
