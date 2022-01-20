@@ -18,23 +18,30 @@ namespace Noise
 		/// </exception>
 		bool IsOneWay { get; }
 
-		/// <summary>
-		/// Encrypts the <paramref name="payload"/> and writes the result into <paramref name="messageBuffer"/>.
-		/// </summary>
-		/// <param name="payload">The payload to encrypt.</param>
-		/// <param name="messageBuffer">The buffer for the encrypted message.</param>
-		/// <returns>The ciphertext size in bytes.</returns>
-		/// <exception cref="ObjectDisposedException">
-		/// Thrown if the current instance has already been disposed.
-		/// </exception>
-		/// <exception cref="InvalidOperationException">
-		/// Thrown if the responder has attempted to write a message to a one-way stream.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		/// Thrown if the encrypted payload was greater than <see cref="Protocol.MaxMessageLength"/>
-		/// bytes in length, or if the output buffer did not have enough space to hold the ciphertext.
-		/// </exception>
-		int WriteMessage(ReadOnlySpan<byte> payload, Span<byte> messageBuffer);
+        /// <summary>
+        /// Get encrypted message size
+        /// </summary>
+        /// <param name="payloadSize">The payload size</param>
+        /// <returns>The encrypted message size</returns>
+        int GetEncryptedMessageSize(int payloadSize);
+
+        /// <summary>
+        /// Encrypts the <paramref name="payload"/> and writes the result into <paramref name="messageBuffer"/>.
+        /// </summary>
+        /// <param name="payload">The payload to encrypt.</param>
+        /// <param name="messageBuffer">The buffer for the encrypted message.</param>
+        /// <returns>The ciphertext size in bytes.</returns>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the current instance has already been disposed.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the responder has attempted to write a message to a one-way stream.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the encrypted payload was greater than <see cref="Protocol.MaxMessageLength"/>
+        /// bytes in length, or if the output buffer did not have enough space to hold the ciphertext.
+        /// </exception>
+        int WriteMessage(ReadOnlySpan<byte> payload, Span<byte> messageBuffer);
 
         /// <summary>
         /// Encrypts the <paramref name="payload"/> and writes the result into <paramref name="messageBuffer"/>.
@@ -55,26 +62,34 @@ namespace Noise
         /// </exception>
         int WriteMessage(ReadOnlySpan<byte> payload, Span<byte> messageBuffer, out ulong counter);
 
-		/// <summary>
-		/// Decrypts the <paramref name="message"/> and writes the result into <paramref name="payloadBuffer"/>.
-		/// </summary>
-		/// <param name="message">The message to decrypt.</param>
-		/// <param name="payloadBuffer">The buffer for the decrypted payload.</param>
-		/// <returns>The plaintext size in bytes.</returns>
-		/// <exception cref="ObjectDisposedException">
-		/// Thrown if the current instance has already been disposed.
-		/// </exception>
-		/// <exception cref="InvalidOperationException">
-		/// Thrown if the initiator has attempted to read a message from a one-way stream.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		/// Thrown if the message was greater than <see cref="Protocol.MaxMessageLength"/>
-		/// bytes in length, or if the output buffer did not have enough space to hold the plaintext.
-		/// </exception>
-		/// <exception cref="System.Security.Cryptography.CryptographicException">
-		/// Thrown if the decryption of the message has failed.
-		/// </exception>
-		int ReadMessage(ReadOnlySpan<byte> message, Span<byte> payloadBuffer);
+
+        /// <summary>
+        /// Get decrypted message size
+        /// </summary>
+        /// <param name="msgSize">encrypted message size</param>
+        /// <returns>decrypted message size</returns>
+        int GetDecryptedMessageSize(int msgSize);
+
+        /// <summary>
+        /// Decrypts the <paramref name="message"/> and writes the result into <paramref name="payloadBuffer"/>.
+        /// </summary>
+        /// <param name="message">The message to decrypt.</param>
+        /// <param name="payloadBuffer">The buffer for the decrypted payload.</param>
+        /// <returns>The plaintext size in bytes.</returns>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the current instance has already been disposed.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the initiator has attempted to read a message from a one-way stream.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the message was greater than <see cref="Protocol.MaxMessageLength"/>
+        /// bytes in length, or if the output buffer did not have enough space to hold the plaintext.
+        /// </exception>
+        /// <exception cref="System.Security.Cryptography.CryptographicException">
+        /// Thrown if the decryption of the message has failed.
+        /// </exception>
+        int ReadMessage(ReadOnlySpan<byte> message, Span<byte> payloadBuffer);
 
 		/// <summary>
 		/// Decrypts the <paramref name="message"/> and writes the result into <paramref name="payloadBuffer"/>.
@@ -147,7 +162,11 @@ namespace Noise
 			}
 		}
 
-		public int WriteMessage(ReadOnlySpan<byte> payload, Span<byte> messageBuffer, out ulong counter)
+        public int GetEncryptedMessageSize(int payloadSize)
+        {
+            return payloadSize  + Aead.TagSize;
+        }
+        public int WriteMessage(ReadOnlySpan<byte> payload, Span<byte> messageBuffer, out ulong counter)
 		{
 			Exceptions.ThrowIfDisposed(disposed, nameof(Transport<CipherType>));
 
@@ -178,7 +197,11 @@ namespace Noise
 		}
 
 
-		public int ReadMessage(ReadOnlySpan<byte> message, Span<byte> payloadBuffer)
+        public int GetDecryptedMessageSize(int msgSize)
+        {
+            return msgSize - Aead.TagSize;
+        }
+        public int ReadMessage(ReadOnlySpan<byte> message, Span<byte> payloadBuffer)
 		{
 			Exceptions.ThrowIfDisposed(disposed, nameof(Transport<CipherType>));
 

@@ -352,6 +352,11 @@ namespace Noise
 			}
 		}
 
+        public int GetEncryptedMessageSize(int payloadSize)
+        {
+            var overhead = messagePatterns.Peek().Overhead(dh.DhLen, state.HasKey(), isPsk);
+            return payloadSize + overhead;
+        }
 		public (int, byte[], Transport) WriteMessage(ReadOnlySpan<byte> payload, Span<byte> messageBuffer)
 		{
 			ThrowIfDisposed();
@@ -437,7 +442,12 @@ namespace Noise
 			return buffer.Slice(bytesWritten);
 		}
 
-		public (int, byte[], Transport) ReadMessage(ReadOnlySpan<byte> message, Span<byte> payloadBuffer)
+        public int GetDecryptedMessageSize(int msgSize)
+        {
+            var overhead = messagePatterns.Peek().Overhead(dh.DhLen, state.HasKey(), isPsk);
+            return msgSize - overhead;
+        }
+        public (int, byte[], Transport) ReadMessage(ReadOnlySpan<byte> message, Span<byte> payloadBuffer)
 		{
 			ThrowIfDisposed();
 

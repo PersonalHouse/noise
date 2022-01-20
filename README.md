@@ -1,3 +1,12 @@
+Portable.Noise is a fork of [Noise.Net](https://github.com/Metalnem/noise) with the following changes:
+
+
+1. The max message size is a setting value now. Noise protocol has 64k limitation on the max message size and [Noise.Net](https://github.com/Metalnem/noise) implement it as a constant. The default setting value of Portable.Noise is 64k, which is compatible with Noise protocol.
+2. Merge "Out of order" from [Zetanova](https://github.com/Zetanova/noise/tree/out-of-order-counter)
+3. Add helper functions (GetEncryptedMessageSize,GetDecryptedMessageSize)
+
+
+
 ![](Noise.png)
 
 [![Latest Version](https://img.shields.io/nuget/v/Noise.NET.svg)](https://www.nuget.org/packages/Noise.NET)
