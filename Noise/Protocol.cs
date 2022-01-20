@@ -17,10 +17,15 @@ namespace Noise
         /// </summary>
         public static int MaxMessageLength = 65535;
 
-		/// <summary>
-		/// Minimum size of the protocol name in bytes.
-		/// </summary>
-		private static readonly int MinProtocolNameLength = "Noise_N_448_AESGCM_SHA256".Length;
+        /// <summary>
+        /// Preshared key size in bytes.
+        /// </summary>
+        public const int PSKSize = Aead.KeySize;
+
+        /// <summary>
+        /// Minimum size of the protocol name in bytes.
+        /// </summary>
+        private static readonly int MinProtocolNameLength = "Noise_N_448_AESGCM_SHA256".Length;
 
 		/// <summary>
 		/// Maximum size of the protocol name in bytes.
