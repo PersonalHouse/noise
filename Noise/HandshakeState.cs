@@ -1,140 +1,28 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Noise
+namespace PortableNoise
 {
-	/// <summary>
-	/// A <see href="https://noiseprotocol.org/noise.html#the-handshakestate-object">HandshakeState</see>
-	/// object contains a <see href="https://noiseprotocol.org/noise.html#the-symmetricstate-object">SymmetricState</see>
-	/// plus the local and remote keys (any of which may be empty),
-	/// a boolean indicating the initiator or responder role, and
-	/// the remaining portion of the handshake pattern.
-	/// </summary>
-	public interface HandshakeState : IDisposable
-	{
-		/// <summary>
-		/// The remote party's static public key.
-		/// </summary>
-		/// <exception cref="ObjectDisposedException">
-		/// Thrown if the current instance has already been disposed.
-		/// </exception>
-		ReadOnlySpan<byte> RemoteStaticPublicKey { get; }
-
-		/// <summary>
-		/// Converts an Alice-initiated pattern to a Bob-initiated pattern.
-		/// The only fallback pattern currently supported is XXfallback.
-		/// PSK modifiers are currently not supported with fallback protocols.
-		/// </summary>
-		/// <param name="protocol">A concrete Noise protocol (e.g. Noise_XXfallback_25519_AESGCM_BLAKE2b).</param>
-		/// <param name="config">A set of parameters used to instantiate a <see cref="HandshakeState"/>.</param>
-		/// <exception cref="ObjectDisposedException">
-		/// Thrown if the current instance has already been disposed.
-		/// </exception>
-		/// <exception cref="ArgumentNullException">
-		/// Thrown if either <paramref name="protocol"/> or <paramref name="config"/> is null.
-		/// </exception>
-		/// <exception cref="ArgumentException">
-		/// Thrown if <paramref name="protocol"/> is not XXfallback,
-		/// or if the provided local static private key is empty.
-		/// </exception>
-		/// <exception cref="InvalidOperationException">
-		/// Throw if the initial handshake pattern is Bob-initiated, or if this
-		/// method was not called immediately after the first handshake message.
-		/// </exception>
-		void Fallback(Protocol protocol, ProtocolConfig config);
-
-        /// <summary>
-        /// Get encrypted message size
-        /// </summary>
-        /// <param name="payloadSize">The payload size</param>
-        /// <returns>The encrypted message size</returns>
-        int GetEncryptedMessageSize(int payloadSize);
-        /// <summary>
-        /// Performs the next step of the handshake,
-        /// encrypts the <paramref name="payload"/>,
-        /// and writes the result into <paramref name="messageBuffer"/>.
-        /// The result is undefined if the <paramref name="payload"/>
-        /// and <paramref name="messageBuffer"/> overlap.
-        /// </summary>
-        /// <param name="payload">The payload to encrypt.</param>
-        /// <param name="messageBuffer">The buffer for the encrypted message.</param>
-        /// <returns>
-        /// The tuple containing the ciphertext size in bytes,
-        /// the handshake hash, and the <see cref="Transport"/>
-        /// object for encrypting transport messages. If the
-        /// handshake is still in progress, the handshake hash
-        /// and the transport will both be null.
-        /// </returns>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the current instance has already been disposed.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the call to <see cref="ReadMessage"/> was expected
-        /// or the handshake has already been completed.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// Thrown if the output was greater than <see cref="Protocol.MaxMessageLength"/>
-        /// bytes in length, or if the output buffer did not have enough space to hold the ciphertext.
-        /// </exception>
-        (int BytesWritten, byte[] HandshakeHash, Transport Transport) WriteMessage(
-			ReadOnlySpan<byte> payload,
-			Span<byte> messageBuffer
-		);
 
 
-        /// <summary>
-        /// Get decrypted message size
-        /// </summary>
-        /// <param name="msgSize">encrypted message size</param>
-        /// <returns>decrypted message size</returns>
-        int GetDecryptedMessageSize(int msgSize);
-
-        /// <summary>
-        /// Performs the next step of the handshake,
-        /// decrypts the <paramref name="message"/>,
-        /// and writes the result into <paramref name="payloadBuffer"/>.
-        /// The result is undefined if the <paramref name="message"/>
-        /// and <paramref name="payloadBuffer"/> overlap.
-        /// </summary>
-        /// <param name="message">The message to decrypt.</param>
-        /// <param name="payloadBuffer">The buffer for the decrypted payload.</param>
-        /// <returns>
-        /// The tuple containing the plaintext size in bytes,
-        /// the handshake hash, and the <see cref="Transport"/>
-        /// object for encrypting transport messages. If the
-        /// handshake is still in progress, the handshake hash
-        /// and the transport will both be null.
-        /// </returns>
-        /// <exception cref="ObjectDisposedException">
-        /// Thrown if the current instance has already been disposed.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if the call to <see cref="WriteMessage"/> was expected
-        /// or the handshake has already been completed.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// Thrown if the message was greater than <see cref="Protocol.MaxMessageLength"/>
-        /// bytes in length, or if the output buffer did not have enough space to hold the plaintext.
-        /// </exception>
-        /// <exception cref="System.Security.Cryptography.CryptographicException">
-        /// Thrown if the decryption of the message has failed.
-        /// </exception>
-        (int BytesRead, byte[] HandshakeHash, Transport Transport) ReadMessage(
-			ReadOnlySpan<byte> message,
-			Span<byte> payloadBuffer
-		);
-	}
-
-	internal sealed class HandshakeState<CipherType, DhType, HashType> : HandshakeState
-		where CipherType : Cipher, new()
+    /// <summary>
+    /// A <see href="https://noiseprotocol.org/noise.html#the-handshakestate-object">HandshakeState</see>
+    /// object contains a <see href="https://noiseprotocol.org/noise.html#the-symmetricstate-object">SymmetricState</see>
+    /// plus the local and remote keys (any of which may be empty),
+    /// a boolean indicating the initiator or responder role, and
+    /// the remaining portion of the handshake pattern.
+    /// </summary>
+    public sealed class HandshakeState<CipherType, DhType, HashType> :IDisposable
+        where CipherType : Cipher, new()
 		where DhType : Dh, new()
 		where HashType : Hash, new()
 	{
 		private Dh dh = new DhType();
 		private SymmetricState<CipherType, DhType, HashType> state;
-		private Protocol protocol;
+		private Protocol<CipherType, DhType, HashType> protocol;
 		private readonly Role role;
 		private Role initiator;
 		private bool turnToWrite;
@@ -149,11 +37,11 @@ namespace Noise
 		private bool disposed;
 
 		public HandshakeState(
-			Protocol protocol,
+			Protocol<CipherType, DhType, HashType> protocol,
 			bool initiator,
-			ReadOnlySpan<byte> prologue,
-			ReadOnlySpan<byte> s,
-			ReadOnlySpan<byte> rs,
+            ReadOnlyMemory<byte> prologue,
+            ReadOnlyMemory<byte> s,
+            ReadOnlyMemory<byte> rs,
 			IEnumerable<byte[]> psks)
 		{
 			Debug.Assert(psks != null);
@@ -231,7 +119,7 @@ namespace Noise
 			}
 		}
 
-		private void ProcessPreSharedKeys(Protocol protocol, IEnumerable<byte[]> psks)
+		private void ProcessPreSharedKeys(Protocol<CipherType, DhType, HashType> protocol, IEnumerable<byte[]> psks)
 		{
 			var patterns = protocol.HandshakePattern.Patterns;
 			var modifiers = protocol.Modifiers;
@@ -283,16 +171,22 @@ namespace Noise
 			psks.Enqueue(psk.AsSpan().ToArray());
 		}
 
-		/// <summary>
-		/// Overrides the DH function. It should only be used
-		/// from Noise.Tests to fix the ephemeral private key.
-		/// </summary>
-		internal void SetDh(Dh dh)
-		{
-			this.dh = dh;
-		}
+        /// <summary>
+        /// Overrides the DH function. It should only be used
+        /// from Noise.Tests to fix the ephemeral private key.
+        /// </summary>
+        internal void SetDh(Dh dh)
+        {
+            this.dh = dh;
+        }
 
-		public ReadOnlySpan<byte> RemoteStaticPublicKey
+        /// <summary>
+        /// The remote party's static public key.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the current instance has already been disposed.
+        /// </exception>
+        public ReadOnlySpan<byte> RemoteStaticPublicKey
 		{
 			get
 			{
@@ -301,7 +195,28 @@ namespace Noise
 			}
 		}
 
-		public void Fallback(Protocol protocol, ProtocolConfig config)
+        /// <summary>
+        /// Converts an Alice-initiated pattern to a Bob-initiated pattern.
+        /// The only fallback pattern currently supported is XXfallback.
+        /// PSK modifiers are currently not supported with fallback protocols.
+        /// </summary>
+        /// <param name="protocol">A concrete Noise protocol (e.g. Noise_XXfallback_25519_AESGCM_BLAKE2b).</param>
+        /// <param name="config">A set of parameters used to instantiate a <see cref="HandshakeState&lt;CipherType, DhType, HashType>"/>.</param>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the current instance has already been disposed.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if either <paramref name="protocol"/> or <paramref name="config"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown if <paramref name="protocol"/> is not XXfallback,
+        /// or if the provided local static private key is empty.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Throw if the initial handshake pattern is Bob-initiated, or if this
+        /// method was not called immediately after the first handshake message.
+        /// </exception>
+        public void Fallback(Protocol<CipherType, DhType, HashType> protocol, ProtocolConfig config)
 		{
 			ThrowIfDisposed();
 			Exceptions.ThrowIfNull(protocol, nameof(protocol));
@@ -366,12 +281,50 @@ namespace Noise
 			}
 		}
 
+        /// <summary>
+        /// Get encrypted message size
+        /// </summary>
+        /// <param name="payloadSize">The payload size</param>
+        /// <returns>The encrypted message size</returns>
         public int GetEncryptedMessageSize(int payloadSize)
         {
             var overhead = messagePatterns.Peek().Overhead(dh.DhLen, state.HasKey(), isPsk);
             return payloadSize + overhead;
         }
-		public (int, byte[], Transport) WriteMessage(ReadOnlySpan<byte> payload, Span<byte> messageBuffer)
+
+        public (int, byte[], Transport) WriteMessage(ReadOnlyMemory<byte> payload, Memory<byte> messageBuffer)
+        {
+            return WriteMessage(new ReadOnlySequence<byte>(payload), messageBuffer);
+        }
+
+        /// <summary>
+        /// Performs the next step of the handshake,
+        /// encrypts the <paramref name="payload"/>,
+        /// and writes the result into <paramref name="messageBuffer"/>.
+        /// The result is undefined if the <paramref name="payload"/>
+        /// and <paramref name="messageBuffer"/> overlap.
+        /// </summary>
+        /// <param name="payload">The payload to encrypt.</param>
+        /// <param name="messageBuffer">The buffer for the encrypted message.</param>
+        /// <returns>
+        /// The tuple containing the ciphertext size in bytes,
+        /// the handshake hash, and the <see cref="Transport"/>
+        /// object for encrypting transport messages. If the
+        /// handshake is still in progress, the handshake hash
+        /// and the transport will both be null.
+        /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the current instance has already been disposed.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the call to <see cref="HandshakeState&lt;CipherType, DhType, HashType>.ReadMessage(ReadOnlySequence&lt;byte>, Memory&lt;byte>)"/> was expected
+        /// or the handshake has already been completed.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the output was greater than <see cref="Protocol.MaxMessageLength"/>
+        /// bytes in length, or if the output buffer did not have enough space to hold the ciphertext.
+        /// </exception>
+        public (int, byte[], Transport) WriteMessage(ReadOnlySequence<byte> payload, Memory<byte> messageBuffer)
 		{
 			ThrowIfDisposed();
 
@@ -381,7 +334,7 @@ namespace Noise
 			}
 
 			var overhead = messagePatterns.Peek().Overhead(dh.DhLen, state.HasKey(), isPsk);
-			var ciphertextSize = payload.Length + overhead;
+			var ciphertextSize = (int)payload.Length + overhead;
 
 			if (ciphertextSize > Protocol.MaxMessageLength)
 			{
@@ -432,7 +385,7 @@ namespace Noise
 			return (ciphertextSize, handshakeHash, transport);
 		}
 
-		private Span<byte> WriteE(Span<byte> buffer)
+		private Memory<byte> WriteE(Memory<byte> buffer)
 		{
 			Debug.Assert(e == null);
 
@@ -448,20 +401,63 @@ namespace Noise
 			return buffer.Slice(e.PublicKey.Length);
 		}
 
-		private Span<byte> WriteS(Span<byte> buffer)
+		private Memory<byte> WriteS(Memory<byte> buffer)
 		{
 			Debug.Assert(s != null);
 
-			var bytesWritten = state.EncryptAndHash(s.PublicKey, buffer);
+			var bytesWritten = state.EncryptAndHash(new ReadOnlySequence<byte>(s.PublicKey), buffer);
 			return buffer.Slice(bytesWritten);
 		}
 
+
+        /// <summary>
+        /// Get decrypted message size
+        /// </summary>
+        /// <param name="msgSize">encrypted message size</param>
+        /// <returns>decrypted message size</returns>
         public int GetDecryptedMessageSize(int msgSize)
         {
             var overhead = messagePatterns.Peek().Overhead(dh.DhLen, state.HasKey(), isPsk);
             return msgSize - overhead;
         }
-        public (int, byte[], Transport) ReadMessage(ReadOnlySpan<byte> message, Span<byte> payloadBuffer)
+
+        public (int, byte[], Transport) ReadMessage(ReadOnlyMemory<byte> message, Memory<byte> payloadBuffer)
+        {
+            return ReadMessage(new ReadOnlySequence<byte>(message), payloadBuffer);
+        }
+
+
+        /// <summary>
+        /// Performs the next step of the handshake,
+        /// decrypts the <paramref name="message"/>,
+        /// and writes the result into <paramref name="payloadBuffer"/>.
+        /// The result is undefined if the <paramref name="message"/>
+        /// and <paramref name="payloadBuffer"/> overlap.
+        /// </summary>
+        /// <param name="message">The message to decrypt.</param>
+        /// <param name="payloadBuffer">The buffer for the decrypted payload.</param>
+        /// <returns>
+        /// The tuple containing the plaintext size in bytes,
+        /// the handshake hash, and the <see cref="Transport"/>
+        /// object for encrypting transport messages. If the
+        /// handshake is still in progress, the handshake hash
+        /// and the transport will both be null.
+        /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown if the current instance has already been disposed.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the call to <see cref="HandshakeState&lt;CipherType, DhType, HashType>.WriteMessage(ReadOnlySequence&lt;byte>, Memory&lt;byte>)"/> was expected
+        /// or the handshake has already been completed.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the message was greater than <see cref="Protocol.MaxMessageLength"/>
+        /// bytes in length, or if the output buffer did not have enough space to hold the plaintext.
+        /// </exception>
+        /// <exception cref="System.Security.Cryptography.CryptographicException">
+        /// Thrown if the decryption of the message has failed.
+        /// </exception>
+        public (int, byte[], Transport) ReadMessage(ReadOnlySequence<byte> message, Memory<byte> payloadBuffer)
 		{
 			ThrowIfDisposed();
 
@@ -471,7 +467,7 @@ namespace Noise
 			}
 
 			var overhead = messagePatterns.Peek().Overhead(dh.DhLen, state.HasKey(), isPsk);
-			var plaintextSize = message.Length - overhead;
+			var plaintextSize = (int)message.Length - overhead;
 
 			if (message.Length > Protocol.MaxMessageLength)
 			{
@@ -525,7 +521,7 @@ namespace Noise
 			return (plaintextSize, handshakeHash, transport);
 		}
 
-		private ReadOnlySpan<byte> ReadE(ReadOnlySpan<byte> buffer)
+		private ReadOnlySequence<byte> ReadE(ReadOnlySequence<byte> buffer)
 		{
 			Debug.Assert(re == null);
 
@@ -540,7 +536,7 @@ namespace Noise
 			return buffer.Slice(re.Length);
 		}
 
-		private ReadOnlySpan<byte> ReadS(ReadOnlySpan<byte> message)
+		private ReadOnlySequence<byte> ReadS(ReadOnlySequence<byte> message)
 		{
 			Debug.Assert(rs == null);
 
@@ -604,12 +600,12 @@ namespace Noise
 			return (handshakeHash, transport);
 		}
 
-		private void DhAndMixKey(KeyPair keyPair, ReadOnlySpan<byte> publicKey)
+		private void DhAndMixKey(KeyPair keyPair, ReadOnlyMemory<byte> publicKey)
 		{
 			Debug.Assert(keyPair != null);
 			Debug.Assert(!publicKey.IsEmpty);
 
-			Span<byte> sharedKey = stackalloc byte[dh.DhLen];
+			var sharedKey = new byte[dh.DhLen];
 			dh.Dh(keyPair, publicKey, sharedKey);
 			state.MixKey(sharedKey);
 		}

@@ -1,11 +1,11 @@
 using System;
 
-namespace Noise
+namespace PortableNoise
 {
 	/// <summary>
 	/// DH functions (and an associated constant).
 	/// </summary>
-	internal interface Dh
+	public interface Dh
 	{
 		/// <summary>
 		/// A constant specifying the size in bytes of public keys and DH outputs.
@@ -21,13 +21,13 @@ namespace Noise
 		/// <summary>
 		/// Generates a Diffie-Hellman key pair from the specified private key.
 		/// </summary>
-		KeyPair GenerateKeyPair(ReadOnlySpan<byte> privateKey);
+		KeyPair GenerateKeyPair(ReadOnlyMemory<byte> privateKey);
 
 		/// <summary>
 		/// Performs a Diffie-Hellman calculation between the private
 		/// key in keyPair and the publicKey and writes an output
 		/// sequence of bytes of length DhLen into sharedKey parameter.
 		/// </summary>
-		void Dh(KeyPair keyPair, ReadOnlySpan<byte> publicKey, Span<byte> sharedKey);
+		void Dh(KeyPair keyPair, ReadOnlyMemory<byte> publicKey, Span<byte> sharedKey);
 	}
 }

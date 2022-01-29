@@ -1,15 +1,18 @@
 using System;
 
-namespace Noise.Tests
+using PortableNoise.Engine;
+
+namespace PortableNoise.Tests
 {
-	internal class FixedKeyDh : Dh
-	{
-		private static readonly Curve25519 dh = new Curve25519();
+	internal class FixedKeyDh<DhType> : Dh
+                where DhType : Dh, new()
+    {
+		private static readonly DhType dh = new DhType();
 		private readonly byte[] privateKey;
 
 		public FixedKeyDh()
 		{
-		}
+		} 
 
 		public FixedKeyDh(byte[] privateKey)
 		{
@@ -21,17 +24,17 @@ namespace Noise.Tests
 		public KeyPair GenerateKeyPair()
 		{
 			var publicKey = new byte[DhLen];
-			Libsodium.crypto_scalarmult_curve25519_base(publicKey, privateKey);
+            Engine.Libsodium.Libsodium.crypto_scalarmult_curve25519_base(publicKey, privateKey);
 
 			return new KeyPair(privateKey, publicKey);
 		}
 
-		public KeyPair GenerateKeyPair(ReadOnlySpan<byte> privateKey)
+		public KeyPair GenerateKeyPair(ReadOnlyMemory<byte> privateKey)
 		{
 			return dh.GenerateKeyPair(privateKey);
 		}
 
-		public void Dh(KeyPair keyPair, ReadOnlySpan<byte> publicKey, Span<byte> sharedKey)
+		public void Dh(KeyPair keyPair, ReadOnlyMemory<byte> publicKey, Span<byte> sharedKey)
 		{
 			dh.Dh(keyPair, publicKey, sharedKey);
 		}

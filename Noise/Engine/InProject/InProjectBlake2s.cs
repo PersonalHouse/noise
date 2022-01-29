@@ -8,15 +8,15 @@ using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Noise
+namespace PortableNoise.Engine.InProject
 {
-	/// <summary>
-	/// BLAKE2s from <see href="https://tools.ietf.org/html/rfc7693">RFC 7693</see>
-	/// with digest length 32.
-	/// </summary>
-	internal sealed class Blake2s : Hash
-	{
-		private const uint IV0 = 0x6a09e667u;
+    /// <summary>
+    /// BLAKE2s from <see href="https://tools.ietf.org/html/rfc7693">RFC 7693</see>
+    /// with digest length 32.
+    /// </summary>
+    public sealed class InProjectBlake2s : Blake2s
+    {
+        private const uint IV0 = 0x6a09e667u;
 		private const uint IV1 = 0xbb67ae85u;
 		private const uint IV2 = 0x3c6ef372u;
 		private const uint IV3 = 0xa54ff53au;
@@ -42,7 +42,7 @@ namespace Noise
 		private readonly byte[] buffer = new byte[BlockSize];
 		private int position;
 
-		public Blake2s()
+		public InProjectBlake2s()
 		{
 			Reset();
 		}
@@ -50,14 +50,14 @@ namespace Noise
 		public int HashLen => OutputSize;
 		public int BlockLen => BlockSize;
 
-		public void AppendData(ReadOnlySpan<byte> data)
+		public void AppendData(ReadOnlyMemory<byte> data)
 		{
 			if (data.IsEmpty)
 			{
 				return;
 			}
 
-			var buffer = this.buffer.AsSpan();
+			var buffer = this.buffer.AsMemory();
 			var left = BlockSize - position;
 
 			if (position > 0 && data.Length > left)
@@ -67,7 +67,7 @@ namespace Noise
 				t0 += BlockSize;
 				t1 += t0 == 0 ? 1u : 0;
 
-				Compress(buffer);
+				Compress(buffer.Span);
 				data = data.Slice(left);
 
 				position = 0;
@@ -78,7 +78,7 @@ namespace Noise
 				t0 += BlockSize;
 				t1 += t0 == 0 ? 1u : 0;
 
-				Compress(data.Slice(0, BlockSize));
+				Compress(data.Slice(0, BlockSize).Span);
 				data = data.Slice(BlockSize);
 			}
 
@@ -89,17 +89,17 @@ namespace Noise
 			}
 		}
 
-		public void GetHashAndReset(Span<byte> hash)
+		public void GetHashAndReset(Memory<byte> hash)
 		{
 			Debug.Assert(hash.Length == HashLen);
 
 			t0 += (uint)position;
-			f = UInt32.MaxValue;
+			f = uint.MaxValue;
 
 			buffer.AsSpan(position).Fill(0);
 			Compress(buffer);
 
-			MemoryMarshal.AsBytes(h.AsSpan()).CopyTo(hash);
+			MemoryMarshal.AsBytes(h.AsSpan()).CopyTo(hash.Span);
 			Reset();
 		}
 

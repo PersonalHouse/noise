@@ -1,6 +1,6 @@
 using System;
 
-namespace Noise
+namespace PortableNoise
 {
 	internal static class Exceptions
 	{

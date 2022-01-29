@@ -1,7 +1,8 @@
 using System;
+using System.Buffers;
 using System.Diagnostics;
 
-namespace Noise
+namespace PortableNoise
 {
 	/// <summary>
 	/// A SymmetricState object contains a CipherState plus ck (a chaining
@@ -25,7 +26,7 @@ namespace Noise
 		/// Initializes a new SymmetricState with an
 		/// arbitrary-length protocolName byte sequence.
 		/// </summary>
-		public SymmetricState(ReadOnlySpan<byte> protocolName)
+		public SymmetricState(ReadOnlyMemory<byte> protocolName)
 		{
 			int length = hash.HashLen;
 
@@ -50,12 +51,12 @@ namespace Noise
 		/// If HashLen is 64, then truncates tempK to 32 bytes.
 		/// Calls InitializeKey(tempK).
 		/// </summary>
-		public void MixKey(ReadOnlySpan<byte> inputKeyMaterial)
+		public void MixKey(ReadOnlyMemory<byte> inputKeyMaterial)
 		{
 			int length = inputKeyMaterial.Length;
 			Debug.Assert(length == 0 || length == Aead.KeySize || length == dh.DhLen);
 
-			Span<byte> output = stackalloc byte[2 * hash.HashLen];
+			Memory<byte> output = new byte[2 * hash.HashLen];
 			hkdf.ExtractAndExpand2(ck, inputKeyMaterial, output);
 
 			output.Slice(0, hash.HashLen).CopyTo(ck);
@@ -67,25 +68,35 @@ namespace Noise
 		/// <summary>
 		/// Sets h = HASH(h || data).
 		/// </summary>
-		public void MixHash(ReadOnlySpan<byte> data)
+		public void MixHash(ReadOnlyMemory<byte> data)
 		{
 			hash.AppendData(h);
 			hash.AppendData(data);
 			hash.GetHashAndReset(h);
 		}
 
-		/// <summary>
-		/// Sets ck, tempH, tempK = HKDF(ck, inputKeyMaterial, 3).
-		/// Calls MixHash(tempH).
-		/// If HashLen is 64, then truncates tempK to 32 bytes.
-		/// Calls InitializeKey(tempK).
-		/// </summary>
-		public void MixKeyAndHash(ReadOnlySpan<byte> inputKeyMaterial)
+        public void MixHash(ReadOnlySequence<byte> data)
+        {
+            hash.AppendData(h);
+            foreach (var item in data)
+            {
+                hash.AppendData(item);
+            }
+            hash.GetHashAndReset(h);
+        }
+
+        /// <summary>
+        /// Sets ck, tempH, tempK = HKDF(ck, inputKeyMaterial, 3).
+        /// Calls MixHash(tempH).
+        /// If HashLen is 64, then truncates tempK to 32 bytes.
+        /// Calls InitializeKey(tempK).
+        /// </summary>
+        public void MixKeyAndHash(ReadOnlyMemory<byte> inputKeyMaterial)
 		{
 			int length = inputKeyMaterial.Length;
 			Debug.Assert(length == 0 || length == Aead.KeySize || length == dh.DhLen);
 
-			Span<byte> output = stackalloc byte[3 * hash.HashLen];
+			Memory<byte> output = new byte[3 * hash.HashLen];
 			hkdf.ExtractAndExpand3(ck, inputKeyMaterial, output);
 
 			output.Slice(0, hash.HashLen).CopyTo(ck);
@@ -110,7 +121,7 @@ namespace Noise
 		/// Sets ciphertext = EncryptWithAd(h, plaintext),
 		/// calls MixHash(ciphertext), and returns ciphertext.
 		/// </summary>
-		public int EncryptAndHash(ReadOnlySpan<byte> plaintext, Span<byte> ciphertext)
+		public int EncryptAndHash(ReadOnlySequence<byte> plaintext, Memory<byte> ciphertext)
 		{
 			int bytesWritten = state.EncryptWithAd(h, plaintext, ciphertext, out _);
 			MixHash(ciphertext.Slice(0, bytesWritten));
@@ -122,7 +133,7 @@ namespace Noise
 		/// Sets ciphertext = EncryptWithAd(h, plaintext),
 		/// calls MixHash(ciphertext), and returns ciphertext and nonce used.
 		/// </summary>
-		public int EncryptAndHash(ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, out ulong nonce)
+		public int EncryptAndHash(ReadOnlySequence<byte> plaintext, Memory<byte> ciphertext, out ulong nonce)
 		{
 			int bytesWritten = state.EncryptWithAd(h, plaintext, ciphertext, out nonce);
 			MixHash(ciphertext.Slice(0, bytesWritten));
@@ -134,10 +145,10 @@ namespace Noise
 		/// Sets plaintext = DecryptWithAd(h, ciphertext),
 		/// calls MixHash(ciphertext), and returns plaintext.
 		/// </summary>
-		public int DecryptAndHash(ReadOnlySpan<byte> ciphertext, Span<byte> plaintext)
+		public int DecryptAndHash(ReadOnlySequence<byte> ciphertexts, Memory<byte> plaintext)
 		{
-			var bytesRead = state.DecryptWithAd(h, ciphertext, plaintext);
-			MixHash(ciphertext);
+			var bytesRead = state.DecryptWithAd(h, ciphertexts, plaintext);
+            MixHash(ciphertexts);
 
 			return bytesRead;
 		}
@@ -146,10 +157,11 @@ namespace Noise
 		/// Sets plaintext = DecryptWithNonceAndAd(n, h, ciphertext),
 		/// calls MixHash(ciphertext), and returns plaintext.
 		/// </summary>
-		public int DecryptAndHash(ulong nonce, ReadOnlySpan<byte> ciphertext, Span<byte> plaintext)
+		public int DecryptAndHash(ulong nonce, ReadOnlySequence<byte> ciphertexts, Memory<byte> plaintext)
 		{
-			var bytesRead = state.DecryptWithNonceAndAd(nonce, h, ciphertext, plaintext);
-			MixHash(ciphertext);
+			var bytesRead = state.DecryptWithNonceAndAd(nonce, h, ciphertexts, plaintext);
+
+            MixHash(ciphertexts);
 
 			return bytesRead;
 		}
@@ -159,7 +171,7 @@ namespace Noise
 		/// </summary>
 		public (CipherState<CipherType> c1, CipherState<CipherType> c2) Split()
 		{
-			Span<byte> output = stackalloc byte[2 * hash.HashLen];
+			Memory<byte> output = new byte[2 * hash.HashLen];
 			hkdf.ExtractAndExpand2(ck, null, output);
 
 			var tempK1 = output.Slice(0, Aead.KeySize);
@@ -193,5 +205,6 @@ namespace Noise
 				disposed = true;
 			}
 		}
-	}
+
+    }
 }

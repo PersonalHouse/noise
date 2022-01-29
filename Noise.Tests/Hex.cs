@@ -1,6 +1,6 @@
 using System;
 
-namespace Noise.Tests
+namespace PortableNoise.Tests
 {
 	internal static class Hex
 	{

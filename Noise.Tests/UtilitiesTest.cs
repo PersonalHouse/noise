@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Xunit;
 
-namespace Noise.Tests
+namespace PortableNoise.Tests
 {
 	public class UtilitiesTest
 	{

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Noise
+namespace PortableNoise
 {
 	/// <summary>
 	/// A pre-message pattern is one of the following

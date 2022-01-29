@@ -1,13 +1,15 @@
 using System;
 
-namespace Noise
+using PortableNoise.Engine;
+
+namespace PortableNoise
 {
 	/// <summary>
 	/// A Diffie-Hellman private/public key pair.
 	/// </summary>
 	public sealed class KeyPair : IDisposable
 	{
-		private static readonly Curve25519 dh = new Curve25519();
+		private static readonly Curve25519 dh = new Engine.Libsodium.SodiumCurve25519();
 		private readonly byte[] privateKey;
 		private readonly byte[] publicKey;
 		private bool disposed;

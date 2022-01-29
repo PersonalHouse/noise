@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 
-namespace Noise
+namespace PortableNoise
 {
-	/// <summary>
-	/// A set of parameters used to instantiate an initial
-	/// <see cref="HandshakeState"/> from a concrete <see cref="Protocol"/>.
-	/// </summary>
-	public sealed class ProtocolConfig
+    /// <summary>
+    /// A set of parameters used to instantiate an initial
+    /// <see cref="HandshakeState&lt;CipherType, DhType, HashType>"/> from a concrete <see cref="Protocol"/>.
+    /// </summary>
+    public sealed class ProtocolConfig
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ProtocolConfig"/> class.

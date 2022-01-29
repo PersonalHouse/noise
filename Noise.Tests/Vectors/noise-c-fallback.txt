@@ -1,7 +1,7 @@
 {
 "vectors": [
 {
-"name": "Noise_XXfallback_25519_ChaChaPoly_BLAKE2s",
+"protocol_name": "Noise_XXfallback_25519_ChaChaPoly_BLAKE2s",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "ChaChaPoly",
@@ -43,7 +43,7 @@
 "handshake_hash": "54e424c6564898d6540f925faaa56516967c1b7847f4cac83016b6d1d318288a"
 },
 {
-"name": "Noise_XXfallback_25519_ChaChaPoly_BLAKE2b",
+"protocol_name": "Noise_XXfallback_25519_ChaChaPoly_BLAKE2b",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "ChaChaPoly",
@@ -85,7 +85,7 @@
 "handshake_hash": "9ca839672840ab3f239a4d1d7136ecde9b3cb8244c0fdc7d6c56f4e394144a54d28326d042ef30d8f253c977efce03d8f728686540672a9eac53dbf9b4c28b57"
 },
 {
-"name": "Noise_XXfallback_25519_ChaChaPoly_SHA256",
+"protocol_name": "Noise_XXfallback_25519_ChaChaPoly_SHA256",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "ChaChaPoly",
@@ -127,7 +127,7 @@
 "handshake_hash": "ecabd6cfc98cb5d46b2abdc22bf2c3e8dc97e40fc019eff2da912db4f19266c6"
 },
 {
-"name": "Noise_XXfallback_25519_ChaChaPoly_SHA512",
+"protocol_name": "Noise_XXfallback_25519_ChaChaPoly_SHA512",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "ChaChaPoly",
@@ -169,7 +169,7 @@
 "handshake_hash": "8a6cce86cce99ffcca5fa8ef912883823debb06721311b77ea64c2db7eba364d37f94f712dea812832b3515857296f028a9c8b2b5f44185b559f350a11849f82"
 },
 {
-"name": "Noise_XXfallback_448_ChaChaPoly_BLAKE2s",
+"protocol_name": "Noise_XXfallback_448_ChaChaPoly_BLAKE2s",
 "pattern": "IK",
 "dh": "448",
 "cipher": "ChaChaPoly",
@@ -211,7 +211,7 @@
 "handshake_hash": "0ab5c9187ad6067d744167f5f6d9a62ed83e07e068028acf3652d78392f7df59"
 },
 {
-"name": "Noise_XXfallback_448_ChaChaPoly_BLAKE2b",
+"protocol_name": "Noise_XXfallback_448_ChaChaPoly_BLAKE2b",
 "pattern": "IK",
 "dh": "448",
 "cipher": "ChaChaPoly",
@@ -253,7 +253,7 @@
 "handshake_hash": "8a122f88d2a5af1edc736bb3030994befe0b6a70e677a98b0947eb8f5647a76f78dbebf95ec62bc70a3824c6dffb08dc76b8de859c5024497ffef09ab5c067c0"
 },
 {
-"name": "Noise_XXfallback_448_ChaChaPoly_SHA256",
+"protocol_name": "Noise_XXfallback_448_ChaChaPoly_SHA256",
 "pattern": "IK",
 "dh": "448",
 "cipher": "ChaChaPoly",
@@ -295,7 +295,7 @@
 "handshake_hash": "de10233028733afa576e3dcf938b94d3590151694649bbcea353358c9efae202"
 },
 {
-"name": "Noise_XXfallback_448_ChaChaPoly_SHA512",
+"protocol_name": "Noise_XXfallback_448_ChaChaPoly_SHA512",
 "pattern": "IK",
 "dh": "448",
 "cipher": "ChaChaPoly",
@@ -337,7 +337,7 @@
 "handshake_hash": "a21b7bfb5df71b1d848070c239a740556a81492587004e2958d2d02dabd99d5da36af7e270572f78f0dde2d2bbff24ff3e18a46b6dd9efc48eef7d836a4aedf8"
 },
 {
-"name": "Noise_XXfallback_25519_AESGCM_BLAKE2s",
+"protocol_name": "Noise_XXfallback_25519_AESGCM_BLAKE2s",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "AESGCM",
@@ -379,7 +379,7 @@
 "handshake_hash": "de0e8dbbb962f0b73378bccc25a2ef40f4ec3f8b4e43baba8fcc73ba8df94484"
 },
 {
-"name": "Noise_XXfallback_25519_AESGCM_BLAKE2b",
+"protocol_name": "Noise_XXfallback_25519_AESGCM_BLAKE2b",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "AESGCM",
@@ -421,7 +421,7 @@
 "handshake_hash": "9a8d5d4cca5e53e3ed14f9e4e9433c98de38a66ca75ab774e482aca933c220d03107b41de066a468467a883c4e64a3840d9663cfbdf4f240b4ffe6ba72d08630"
 },
 {
-"name": "Noise_XXfallback_25519_AESGCM_SHA256",
+"protocol_name": "Noise_XXfallback_25519_AESGCM_SHA256",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "AESGCM",
@@ -463,7 +463,7 @@
 "handshake_hash": "07c36d69147bca9eb6b2027bfe8dc6b1ebb24b50d60d99365e402164786204e3"
 },
 {
-"name": "Noise_XXfallback_25519_AESGCM_SHA512",
+"protocol_name": "Noise_XXfallback_25519_AESGCM_SHA512",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "AESGCM",
@@ -505,7 +505,7 @@
 "handshake_hash": "2f56227a97846c8c3ff0c780e88f5764055a0b1a24a37e2c021f79c42b09c9d2a942c3010146b615df038f0b78b1abf1623058f9ef5a468b778ee77320797fa4"
 },
 {
-"name": "Noise_XXfallback_448_AESGCM_BLAKE2s",
+"protocol_name": "Noise_XXfallback_448_AESGCM_BLAKE2s",
 "pattern": "IK",
 "dh": "448",
 "cipher": "AESGCM",
@@ -547,7 +547,7 @@
 "handshake_hash": "93d20d7b293a9fc4e9a548c95febe5a9f13e248e32f172856831712a3e56dcc7"
 },
 {
-"name": "Noise_XXfallback_448_AESGCM_BLAKE2b",
+"protocol_name": "Noise_XXfallback_448_AESGCM_BLAKE2b",
 "pattern": "IK",
 "dh": "448",
 "cipher": "AESGCM",
@@ -589,7 +589,7 @@
 "handshake_hash": "0c1345204682c10d63b2c58b6a6ee117a825cd21fa1068c139fb856643b2ecf389c5643b62aac702de84b4dd8166a734180632c7f2ba6ea8b079de2c75da2263"
 },
 {
-"name": "Noise_XXfallback_448_AESGCM_SHA256",
+"protocol_name": "Noise_XXfallback_448_AESGCM_SHA256",
 "pattern": "IK",
 "dh": "448",
 "cipher": "AESGCM",
@@ -631,7 +631,7 @@
 "handshake_hash": "1e076ced4d3be04fe743b451a9ccda8278807e47a2e4d239e3014fa385781d05"
 },
 {
-"name": "Noise_XXfallback_448_AESGCM_SHA512",
+"protocol_name": "Noise_XXfallback_448_AESGCM_SHA512",
 "pattern": "IK",
 "dh": "448",
 "cipher": "AESGCM",
@@ -673,7 +673,7 @@
 "handshake_hash": "16725e642cacffdf4c8ce31e5c87323ee2b7783ce690cf2ef3c038fe604041bc65fa2bd331a079c7b920b981294d61c0bfceaf531e50870b46dc9d9fa66a3261"
 },
 {
-"name": "NoisePSK_XXfallback_25519_ChaChaPoly_BLAKE2s",
+"protocol_name": "NoisePSK_XXfallback_25519_ChaChaPoly_BLAKE2s",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "ChaChaPoly",
@@ -717,7 +717,7 @@
 "handshake_hash": "6a278b58c1790698a878a7f4fad6f0db0e236b3669e16676fc7b84a2252810d8"
 },
 {
-"name": "NoisePSK_XXfallback_25519_ChaChaPoly_BLAKE2b",
+"protocol_name": "NoisePSK_XXfallback_25519_ChaChaPoly_BLAKE2b",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "ChaChaPoly",
@@ -761,7 +761,7 @@
 "handshake_hash": "1a2439e5fb4f6461b720061821fd1a1975f6f64e6f27e0a59abbfc9b9af5efddff0ebc4f05d39952bfcc5ae3d3d4e2b791779d15276e610c8874573d510c03bb"
 },
 {
-"name": "NoisePSK_XXfallback_25519_ChaChaPoly_SHA256",
+"protocol_name": "NoisePSK_XXfallback_25519_ChaChaPoly_SHA256",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "ChaChaPoly",
@@ -805,7 +805,7 @@
 "handshake_hash": "783635536d56c2881420defe04ff7a0f8eec61341e79561d36789dc715ba966b"
 },
 {
-"name": "NoisePSK_XXfallback_25519_ChaChaPoly_SHA512",
+"protocol_name": "NoisePSK_XXfallback_25519_ChaChaPoly_SHA512",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "ChaChaPoly",
@@ -849,7 +849,7 @@
 "handshake_hash": "ceb5ef3ca4e60d860fdcd9b80eb48c1b72c7f4ef9146a8b7a4ac406c5a78968eef60ab328b57a6a2778778eb3ebebc1101605175fbfde77fa86ff88d13ef51df"
 },
 {
-"name": "NoisePSK_XXfallback_448_ChaChaPoly_BLAKE2s",
+"protocol_name": "NoisePSK_XXfallback_448_ChaChaPoly_BLAKE2s",
 "pattern": "IK",
 "dh": "448",
 "cipher": "ChaChaPoly",
@@ -893,7 +893,7 @@
 "handshake_hash": "57edb263b0683a4531ce808d1709a42c4e7b8514d0ca415f4eecca68e796b76b"
 },
 {
-"name": "NoisePSK_XXfallback_448_ChaChaPoly_BLAKE2b",
+"protocol_name": "NoisePSK_XXfallback_448_ChaChaPoly_BLAKE2b",
 "pattern": "IK",
 "dh": "448",
 "cipher": "ChaChaPoly",
@@ -937,7 +937,7 @@
 "handshake_hash": "7f1e0c96e6d02158c5934430b17d0dc1e408983b76f770ef0c6466cda0fc49e32c442d7a07b1a100086daee47d86cec3401b706f2d588f63932a877d6512d237"
 },
 {
-"name": "NoisePSK_XXfallback_448_ChaChaPoly_SHA256",
+"protocol_name": "NoisePSK_XXfallback_448_ChaChaPoly_SHA256",
 "pattern": "IK",
 "dh": "448",
 "cipher": "ChaChaPoly",
@@ -981,7 +981,7 @@
 "handshake_hash": "bb597c0313f32c1c45bd6210f427673284ee5961bfb999c5bf2e4246260097a4"
 },
 {
-"name": "NoisePSK_XXfallback_448_ChaChaPoly_SHA512",
+"protocol_name": "NoisePSK_XXfallback_448_ChaChaPoly_SHA512",
 "pattern": "IK",
 "dh": "448",
 "cipher": "ChaChaPoly",
@@ -1025,7 +1025,7 @@
 "handshake_hash": "cf069aa84a26764c71ef6bdb86eec784e3e04f05d256eb2662554cc1e73b0e9d1f7074e16bd828a6dd7a46e6d991ef1b0c80063962a39cdd59ac8daa93ecccbc"
 },
 {
-"name": "NoisePSK_XXfallback_25519_AESGCM_BLAKE2s",
+"protocol_name": "NoisePSK_XXfallback_25519_AESGCM_BLAKE2s",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "AESGCM",
@@ -1069,7 +1069,7 @@
 "handshake_hash": "7916e65e10ad089fc982bd18da1dff1d0a1ddbe2989f25673b5bb71047d1c02b"
 },
 {
-"name": "NoisePSK_XXfallback_25519_AESGCM_BLAKE2b",
+"protocol_name": "NoisePSK_XXfallback_25519_AESGCM_BLAKE2b",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "AESGCM",
@@ -1113,7 +1113,7 @@
 "handshake_hash": "47dc0060d5e048b4a0b86b4325dd6e42fd8d0d89f7fc17b207c062d29e30a193a4048666ed7d476535a131a3cb3634c2a3dd65a9df8cda99b03ffbcd5dea310e"
 },
 {
-"name": "NoisePSK_XXfallback_25519_AESGCM_SHA256",
+"protocol_name": "NoisePSK_XXfallback_25519_AESGCM_SHA256",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "AESGCM",
@@ -1157,7 +1157,7 @@
 "handshake_hash": "66f4a79d0d379e9b101b1ed04347cc04d9af15822e5202addc8abceb3fc8a8cd"
 },
 {
-"name": "NoisePSK_XXfallback_25519_AESGCM_SHA512",
+"protocol_name": "NoisePSK_XXfallback_25519_AESGCM_SHA512",
 "pattern": "IK",
 "dh": "25519",
 "cipher": "AESGCM",
@@ -1201,7 +1201,7 @@
 "handshake_hash": "770c1c216c4ef6ae235c97c2a55f7a366cbf45c32b141fdf58a5b3f872ee3aac5b47200723d9435ddaf0de2821cc1c00d0b66aef27a89aaec2717669984c0b40"
 },
 {
-"name": "NoisePSK_XXfallback_448_AESGCM_BLAKE2s",
+"protocol_name": "NoisePSK_XXfallback_448_AESGCM_BLAKE2s",
 "pattern": "IK",
 "dh": "448",
 "cipher": "AESGCM",
@@ -1245,7 +1245,7 @@
 "handshake_hash": "82b28df5f96ef45d4fec9c97fbdd445a46cbed53353f46a1ec7c4e4e603a6cbe"
 },
 {
-"name": "NoisePSK_XXfallback_448_AESGCM_BLAKE2b",
+"protocol_name": "NoisePSK_XXfallback_448_AESGCM_BLAKE2b",
 "pattern": "IK",
 "dh": "448",
 "cipher": "AESGCM",
@@ -1289,7 +1289,7 @@
 "handshake_hash": "a98e309713e879c0aa169c2a3aec713e1b95995aaac4dae5b3e722e75c5b7db6f55143e5c6bba0ae3e661f372fe5341479f6f72b9812f889576d206e412605fd"
 },
 {
-"name": "NoisePSK_XXfallback_448_AESGCM_SHA256",
+"protocol_name": "NoisePSK_XXfallback_448_AESGCM_SHA256",
 "pattern": "IK",
 "dh": "448",
 "cipher": "AESGCM",
@@ -1333,7 +1333,7 @@
 "handshake_hash": "3b1abea99476c99fd149704ce9d22ef1a7224c8b85f55064d687670526253fc2"
 },
 {
-"name": "NoisePSK_XXfallback_448_AESGCM_SHA512",
+"protocol_name": "NoisePSK_XXfallback_448_AESGCM_SHA512",
 "pattern": "IK",
 "dh": "448",
 "cipher": "AESGCM",

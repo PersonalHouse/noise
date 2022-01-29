@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace Noise.Examples
+namespace PortableNoise.Examples
 {
 	public class Program
 	{
@@ -13,10 +14,10 @@ namespace Noise.Examples
 		private static readonly Channel serverToClient = new Channel();
 
 		// Noise_IKpsk2_25519_ChaChaPoly_BLAKE2b
-		private static readonly Protocol protocol = new Protocol(
+		private static readonly Protocol<Engine.Libsodium.SodiumChaCha20Poly1305,
+            Engine.Libsodium.SodiumCurve25519, Engine.Libsodium.SodiumBlake2b> protocol = new Protocol<Engine.Libsodium.SodiumChaCha20Poly1305,
+            Engine.Libsodium.SodiumCurve25519,Engine.Libsodium.SodiumBlake2b>(
 			HandshakePattern.IK,
-			CipherFunction.ChaChaPoly,
-			HashFunction.Blake2b,
 			PatternModifiers.Psk2
 		);
 
@@ -56,7 +57,7 @@ namespace Noise.Examples
 		{
 			var buffer = new byte[Protocol.MaxMessageLength];
 
-			using (var handshakeState = protocol.Create(true, s: s, rs: rs, psks: psks))
+			using (var handshakeState = protocol.CreateHandshakeState(true, s: s, rs: rs, psks: psks))
 			{
 				// Send the first handshake message to the server.
 				var (bytesWritten, _, _) = handshakeState.WriteMessage(null, buffer);
@@ -64,7 +65,7 @@ namespace Noise.Examples
 
 				// Receive the second handshake message from the server.
 				var received = await serverToClient.Receive();
-				var (_, _, transport) = handshakeState.ReadMessage(received, buffer);
+				var (_, _, transport) = handshakeState.ReadMessage(new ReadOnlySequence<byte>(received), buffer);
 
 				// Handshake complete, switch to transport mode.
 				using (transport)
@@ -74,12 +75,12 @@ namespace Noise.Examples
 						Memory<byte> request = Encoding.UTF8.GetBytes(message);
 
 						// Send the message to the server.
-						bytesWritten = transport.WriteMessage(request.Span, buffer);
+						bytesWritten = transport.WriteMessage(new ReadOnlySequence<byte>(request), buffer);
 						await clientToServer.Send(Slice(buffer, bytesWritten));
 
 						// Receive the response and print it to the standard output.
 						var response = await serverToClient.Receive();
-						var bytesRead = transport.ReadMessage(response, buffer);
+						var bytesRead = transport.ReadMessage(new ReadOnlySequence<byte>(response), buffer);
 
 						Console.WriteLine(Encoding.UTF8.GetString(Slice(buffer, bytesRead)));
 					}
@@ -91,11 +92,11 @@ namespace Noise.Examples
 		{
 			var buffer = new byte[Protocol.MaxMessageLength];
 
-			using (var handshakeState = protocol.Create(false, s: s, psks: psks))
+			using (var handshakeState = protocol.CreateHandshakeState(false, s: s, psks: psks))
 			{
 				// Receive the first handshake message from the client.
 				var received = await clientToServer.Receive();
-				handshakeState.ReadMessage(received, buffer);
+				handshakeState.ReadMessage(new ReadOnlySequence<byte>(received), buffer);
 
 				// Send the second handshake message to the client.
 				var (bytesWritten, _, transport) = handshakeState.WriteMessage(null, buffer);
@@ -108,10 +109,10 @@ namespace Noise.Examples
 					{
 						// Receive the message from the client.
 						var request = await clientToServer.Receive();
-						var bytesRead = transport.ReadMessage(request, buffer);
+						var bytesRead = transport.ReadMessage(new ReadOnlySequence<byte>(request), buffer);
 
 						// Echo the message back to the client.
-						bytesWritten = transport.WriteMessage(Slice(buffer, bytesRead), buffer);
+						bytesWritten = transport.WriteMessage(new ReadOnlySequence<byte>(Slice(buffer, bytesRead)), buffer);
 						await serverToClient.Send(Slice(buffer, bytesWritten));
 					}
 				}

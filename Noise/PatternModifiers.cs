@@ -1,6 +1,6 @@
 using System;
 
-namespace Noise
+namespace PortableNoise
 {
 	/// <summary>
 	/// Pattern modifiers specify arbitrary extensions or modifications

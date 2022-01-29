@@ -1,4 +1,4 @@
-namespace Noise
+namespace PortableNoise
 {
 	/// <summary>
 	/// The smallest unit of the Noise handshake language.

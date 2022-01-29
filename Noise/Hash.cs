@@ -1,11 +1,11 @@
 using System;
 
-namespace Noise
+namespace PortableNoise
 {
-	/// <summary>
-	/// Hash functions (and associated constants).
-	/// </summary>
-	internal interface Hash : IDisposable
+    /// <summary>
+    /// Hash functions (and associated constants).
+    /// </summary>
+    public interface Hash : IDisposable
 	{
 		/// <summary>
 		/// A constant specifying the size in bytes of the hash output.
@@ -21,12 +21,12 @@ namespace Noise
 		/// <summary>
 		/// Appends the specified data to the data already processed in the hash.
 		/// </summary>
-		void AppendData(ReadOnlySpan<byte> data);
+		void AppendData(ReadOnlyMemory<byte> data);
 
 		/// <summary>
 		/// Retrieves the hash for the accumulated data into the hash parameter,
 		/// and resets the object to its initial state.
 		/// </summary>
-		void GetHashAndReset(Span<byte> hash);
+		void GetHashAndReset(Memory<byte> hash);
 	}
 }

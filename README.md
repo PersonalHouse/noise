@@ -1,10 +1,26 @@
 Portable.Noise is a fork of [Noise.Net](https://github.com/Metalnem/noise) with the following changes:
 
 
+
+|                           Method |       Mean |    Error |   StdDev |
+|--------------------------------- |-----------:|---------:|---------:|
+|        BCChaCha20Poly1305Encrypt |   923.9 ns |  3.13 ns |  2.93 ns |
+|               BCChaCha20Poly1305 | 2,143.0 ns |  5.65 ns |  5.29 ns |
+|                  BCAESGCMEncrypt | 2,052.8 ns |  9.32 ns |  8.72 ns |
+|                         BCAESGCM | 4,184.4 ns | 16.40 ns | 15.34 ns |
+|      Net6ChaCha20Poly1305Encrypt |         NA |       NA |       NA |
+| LibsodiumChaCha20Poly1305Encrypt |   376.4 ns |  0.36 ns |  0.32 ns |
+|        LibsodiumChaCha20Poly1305 |   766.6 ns |  0.97 ns |  0.86 ns |
+|           LibsodiumAESGCMEncrypt |   182.5 ns |  0.19 ns |  0.18 ns |
+|                  LibsodiumAESGCM |   354.6 ns |  1.20 ns |  1.12 ns |
+
+
 1. The max message size is a setting value now. Noise protocol has 64k limitation on the max message size and [Noise.Net](https://github.com/Metalnem/noise) implement it as a constant. The default setting value of Portable.Noise is 64k, which is compatible with Noise protocol.
 2. Merge "Out of order" from [Zetanova](https://github.com/Zetanova/noise/tree/out-of-order-counter)
+It works but there is some problems about Noise internal state, which is not fully unordered.
 3. Add helper functions (GetEncryptedMessageSize,GetDecryptedMessageSize)
-
+4. Add BouncyCastle
+5.
 
 
 ![](Noise.png)

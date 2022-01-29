@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Noise
+namespace PortableNoise
 {
 	/// <summary>
 	/// HMAC-based Extract-and-Expand Key Derivation Function, defined in
@@ -24,16 +24,16 @@ namespace Noise
 		/// byte sequences of length 2 * HashLen into output parameter.
 		/// </summary>
 		public void ExtractAndExpand2(
-			ReadOnlySpan<byte> chainingKey,
-			ReadOnlySpan<byte> inputKeyMaterial,
-			Span<byte> output)
+			ReadOnlyMemory<byte> chainingKey,
+            ReadOnlyMemory<byte> inputKeyMaterial,
+            Memory<byte> output)
 		{
 			int hashLen = inner.HashLen;
 
 			Debug.Assert(chainingKey.Length == hashLen);
 			Debug.Assert(output.Length == 2 * hashLen);
 
-			Span<byte> tempKey = stackalloc byte[hashLen];
+			var tempKey = new byte[hashLen];
 			HmacHash(chainingKey, tempKey, inputKeyMaterial);
 
 			var output1 = output.Slice(0, hashLen);
@@ -50,16 +50,16 @@ namespace Noise
 		/// byte sequences of length 3 * HashLen into output parameter.
 		/// </summary>
 		public void ExtractAndExpand3(
-			ReadOnlySpan<byte> chainingKey,
-			ReadOnlySpan<byte> inputKeyMaterial,
-			Span<byte> output)
+            ReadOnlyMemory<byte> chainingKey,
+            ReadOnlyMemory<byte> inputKeyMaterial,
+			Memory<byte> output)
 		{
 			int hashLen = inner.HashLen;
 
 			Debug.Assert(chainingKey.Length == hashLen);
 			Debug.Assert(output.Length == 3 * hashLen);
 
-			Span<byte> tempKey = stackalloc byte[hashLen];
+			var tempKey = new byte[hashLen];
 			HmacHash(chainingKey, tempKey, inputKeyMaterial);
 
 			var output1 = output.Slice(0, hashLen);
@@ -73,18 +73,18 @@ namespace Noise
 		}
 
 		private void HmacHash(
-			ReadOnlySpan<byte> key,
-			Span<byte> hmac,
-			ReadOnlySpan<byte> data1 = default,
-			ReadOnlySpan<byte> data2 = default)
+            ReadOnlyMemory<byte> key,
+            Memory<byte> hmac,
+            ReadOnlyMemory<byte> data1 = default,
+            ReadOnlyMemory<byte> data2 = default)
 		{
 			Debug.Assert(key.Length == inner.HashLen);
 			Debug.Assert(hmac.Length == inner.HashLen);
 
 			var blockLen = inner.BlockLen;
 
-			Span<byte> ipad = stackalloc byte[blockLen];
-			Span<byte> opad = stackalloc byte[blockLen];
+			var ipad = new byte[blockLen];
+            var opad = new byte[blockLen];
 
 			key.CopyTo(ipad);
 			key.CopyTo(opad);

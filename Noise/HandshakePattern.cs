@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Noise
+namespace PortableNoise
 {
 	/// <summary>
 	/// A <see href="https://noiseprotocol.org/noise.html#handshake-patterns">handshake pattern</see>

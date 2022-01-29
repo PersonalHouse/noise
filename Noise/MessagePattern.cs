@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Noise
+namespace PortableNoise
 {
 	/// <summary>
 	/// A message pattern is some sequence of tokens from

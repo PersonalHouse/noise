@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Noise\Noise.csproj" />
+    <ProjectReference Include="..\Noise\PortableNoise.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

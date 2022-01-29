@@ -2,19 +2,25 @@ using System;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+
+using PortableNoise.Engine;
+using PortableNoise.Engine.Libsodium;
+
 using Xunit;
 
-namespace Noise.Tests
+namespace PortableNoise.Tests
 {
 	public class BlakeTest
 	{
-		[Fact]
-		public void TestVectors()
+		[Theory]
+        [InlineData(CrytoEngineType.Libsodium)]
+        [InlineData(CrytoEngineType.BouncyCastle)]
+        public void TestVectors(CrytoEngineType para)
 		{
 			var s = File.ReadAllText("Vectors/blake2-kat.json");
 			var json = JArray.Parse(s);
 
-			using (var hasher = new Blake2s())
+			using (var hasher = CrytoEngine.CreateBlake2s(para))
 			{
 				byte[] hash = new byte[hasher.HashLen];
 
@@ -25,7 +31,7 @@ namespace Noise.Tests
 					var key = (string)vector["key"];
 					var output = Hex.Decode((string)vector["out"]);
 
-					if (name == "blake2s" && String.IsNullOrEmpty(key))
+					if (name == "blake2s" && string.IsNullOrEmpty(key))
 					{
 						hasher.AppendData(input);
 						hasher.GetHashAndReset(hash);
@@ -36,16 +42,18 @@ namespace Noise.Tests
 			}
 		}
 
-		//[Fact(Skip = "Takes too long to complete.")]
+        //[Fact(Skip = "Takes too long to complete.")]
 
-        [Fact]
-        public void TestLargeInput()
-		{
+        [Theory]
+        [InlineData(CrytoEngineType.Libsodium)]
+        [InlineData(CrytoEngineType.BouncyCastle)]
+        public void TestLargeInput(CrytoEngineType para)
+        {
 			var factor = 1031;
 			var data = new byte[factor];
 
-			using (var hasher = new Blake2s())
-			{
+			using (var hasher = CrytoEngine.CreateBlake2s(para))
+            {
 				int count = 4 * factor * factor;
 
 				for (int i = 0; i < count; ++i)
@@ -63,13 +71,15 @@ namespace Noise.Tests
 			}
 		}
 
-		//[Fact(Skip = "Takes too long to complete.")]
-        [Fact]
-        public void TestSplits()
-		{
-			var data = Enumerable.Range(0, 256).Select(i => (byte)i).ToArray().AsSpan();
+        //[Fact(Skip = "Takes too long to complete.")]
+        [Theory]
+        [InlineData(CrytoEngineType.Libsodium)]
+        [InlineData(CrytoEngineType.BouncyCastle)]
+        public void TestSplits(CrytoEngineType para)
+        {
+			var data = Enumerable.Range(0, 256).Select(i => (byte)i).ToArray().AsMemory();
 
-			using (var hasher = new Blake2s())
+			using (var hasher = CrytoEngine.CreateBlake2s(para))
 			{
 				var hash1 = new byte[hasher.HashLen];
 				var hash2 = new byte[hasher.HashLen];
