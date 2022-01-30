@@ -32,7 +32,14 @@ namespace PortableNoise.Tests
 
             if (protocolName.Contains("448"))
             {
-                return;
+                var nnn = 1 + 1;
+            }
+
+            var protarr = protocolName.Split('_');
+            bool issinglepsk = false;
+            if (string.Compare(protarr[0], "noisepsk", true) == 0)
+            {
+                issinglepsk = true;
             }
 
             var initPrologue = GetBytes(vector, "init_prologue");
@@ -47,7 +54,20 @@ namespace PortableNoise.Tests
             var respRemoteStatic = GetBytes(vector, "resp_remote_static");
             var handshakeHash = GetBytes(vector, "handshake_hash");
 
-            var protocol = new Protocol<CipherType, DHType, HashType>(handshake, pattern);
+            Protocol<CipherType, DHType, HashType> protocol;
+            if (issinglepsk)
+            {
+                var initPsk = GetBytes(vector, "init_psk");
+                var respPsk = GetBytes(vector, "resp_psk");
+                initPsks = new List<byte[]> { initPsk };
+                respPsks = new List<byte[]> { respPsk };
+
+                protocol = new Protocol<CipherType, DHType, HashType>(handshake, pattern|PatternModifiers.Psk0);
+            }else
+            {
+                protocol = new Protocol<CipherType, DHType, HashType>(handshake, pattern);
+            }
+
 
             var init = protocol.CreateHandshakeState(true, initPrologue, initStatic, initRemoteStatic, initPsks);
             var resp = protocol.CreateHandshakeState(false, respPrologue, respStatic, respRemoteStatic, respPsks);
@@ -241,8 +261,11 @@ namespace PortableNoise.Tests
             using (var rnd = RandomNumberGenerator.Create())
                 psk = new byte[32];
 
-            var initiator_static = KeyPair.Generate();
-            var responder_static = KeyPair.Generate();
+
+            var dh = new Engine.Libsodium.SodiumCurve25519();
+
+            var initiator_static = dh.GenerateKeyPair();
+            var responder_static = dh.GenerateKeyPair();
 
             //var protocol = Protocol.Parse("Noise_IKpsk2_25519_ChaChaPoly_BLAKE2b".AsSpan());
 

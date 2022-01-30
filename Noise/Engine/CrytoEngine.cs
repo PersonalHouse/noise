@@ -11,5 +11,19 @@ namespace PortableNoise.Engine
         {
             return new InProject.InProjectBlake2s();
         }
+
+
+        static public bool IsLibsodiumSupported()
+        {
+            try
+            {
+                var t = Libsodium.Libsodium.IsAes256GcmAvailable;
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }

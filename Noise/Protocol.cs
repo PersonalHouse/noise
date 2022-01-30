@@ -173,6 +173,10 @@ namespace PortableNoise
             {
                 protocolName.Append("25519");
             }
+            else if (typeof(Engine.Curve448).IsAssignableFrom(typeof(DHType)))
+            {
+                protocolName.Append("448");
+            }
             else
             {
                 throw new ArgumentException("Invalid CipherType");

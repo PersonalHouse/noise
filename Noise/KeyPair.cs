@@ -9,7 +9,6 @@ namespace PortableNoise
 	/// </summary>
 	public sealed class KeyPair : IDisposable
 	{
-		private static readonly Curve25519 dh = new Engine.Libsodium.SodiumCurve25519();
 		private readonly byte[] privateKey;
 		private readonly byte[] publicKey;
 		private bool disposed;
@@ -30,28 +29,20 @@ namespace PortableNoise
 			Exceptions.ThrowIfNull(privateKey, nameof(privateKey));
 			Exceptions.ThrowIfNull(publicKey, nameof(publicKey));
 
-			if (privateKey.Length != 32)
+			if (privateKey.Length < 32)
 			{
-				throw new ArgumentException("Private key must have length of 32 bytes.", nameof(privateKey));
+				throw new ArgumentException("Private key at least have length of 32 bytes.", nameof(privateKey));
 			}
 
-			if (publicKey.Length != 32)
+			if (publicKey.Length < 32)
 			{
-				throw new ArgumentException("Public key must have length of 32 bytes.", nameof(publicKey));
+				throw new ArgumentException("Public key at least have length of 32 bytes.", nameof(publicKey));
 			}
 
 			this.privateKey = privateKey;
 			this.publicKey = publicKey;
 		}
 
-		/// <summary>
-		/// Generates a new Diffie-Hellman key pair.
-		/// </summary>
-		/// <returns>A randomly generated private key and its corresponding public key.</returns>
-		public static KeyPair Generate()
-		{
-			return dh.GenerateKeyPair();
-		}
 
 		/// <summary>
 		/// Gets the private key.

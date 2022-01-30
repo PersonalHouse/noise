@@ -23,10 +23,7 @@ namespace PortableNoise.Tests
 
 		public KeyPair GenerateKeyPair()
 		{
-			var publicKey = new byte[DhLen];
-            Engine.Libsodium.Libsodium.crypto_scalarmult_curve25519_base(publicKey, privateKey);
-
-			return new KeyPair(privateKey, publicKey);
+            return dh.GenerateKeyPair(privateKey);
 		}
 
 		public KeyPair GenerateKeyPair(ReadOnlyMemory<byte> privateKey)

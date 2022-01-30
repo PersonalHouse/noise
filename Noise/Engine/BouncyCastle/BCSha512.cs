@@ -12,7 +12,7 @@ namespace PortableNoise.Engine.BouncyCastle
     /// </summary>
     public class BCSha512 : Sha512
     {
-        Sha512Digest hash;
+        readonly Sha512Digest hash;
 
         public BCSha512()
         {

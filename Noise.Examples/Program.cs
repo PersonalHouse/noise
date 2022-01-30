@@ -31,9 +31,10 @@ namespace PortableNoise.Examples
 
 		public static void Main(string[] args)
 		{
-			// Generate static keys for the client and the server.
-			using (var clientStatic = KeyPair.Generate())
-			using (var serverStatic = KeyPair.Generate())
+            var dh = new Engine.Libsodium.SodiumCurve25519();
+            // Generate static keys for the client and the server.
+            using (var clientStatic = dh.GenerateKeyPair())
+			using (var serverStatic = dh.GenerateKeyPair())
 			{
 				var psk = new byte[32];
 

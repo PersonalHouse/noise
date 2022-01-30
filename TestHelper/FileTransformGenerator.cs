@@ -86,6 +86,12 @@ namespace PortableNoise.Tests
             s = File.ReadAllText(Path.Combine(projectDirectory, "Vectors/noise-c-fallback.txt"));
             GenerateTests(s, sb, "_fb", "CoreTestFallback");
 
+            s = File.ReadAllText(Path.Combine(projectDirectory, "Vectors/c/cacophony.txt"));
+            GenerateTests(s, sb, "_ncacophony", "CoreTest");
+
+            s = File.ReadAllText(Path.Combine(projectDirectory, "Vectors/c/noise-c-basic.txt"));
+            GenerateTests(s, sb, "_ncb", "CoreTest");
+
             sb.Append("/*");
             sb.Append("*/");
 
@@ -106,7 +112,6 @@ namespace PortableNoise.Tests
                     var protocolName = GetString(vector, "protocol_name");
 
                     var protarr = protocolName.Split('_');
-
 
 
                     var next = protarr[1];
@@ -138,10 +143,6 @@ namespace PortableNoise.Tests
                         fmodifiers = "PatternModifiers.None";
                     }
                     string ec = protarr[2];
-                    if (string.Compare(protarr[2], "25519", true) != 0)
-                    {
-                        continue;
-                    }
 
 
                     string cipher = protarr[3];
@@ -182,9 +183,13 @@ namespace PortableNoise.Tests
                         throw new Exception($"Get hash {hash} {protocolName}");
                     }
 
+
                     var scontent = vector.ToString();
                     scontent = scontent.Replace("\"", "\"\"");
-                    sb.Append($@"
+                    if (ec != "448")
+                    {
+
+                        sb.Append($@"
     [Fact]
     private void Test{protocolName.Replace("+", "")}Sodium{postfix}()
     {{
@@ -193,6 +198,7 @@ namespace PortableNoise.Tests
 
     }}
 ");
+                    }
                     hash = protarr[4];
                     pre = "Engine.BouncyCastle.BC";
                     if (string.Compare(hash, "BLAKE2b", true) == 0)
@@ -221,7 +227,7 @@ namespace PortableNoise.Tests
     {{
 
         var s=@""{scontent}"";
-        {testfunc}<{pre}{cipher},Engine.Libsodium.SodiumCurve{ec}, {hash}>(HandshakePattern.{pattern},{fmodifiers},s);
+        {testfunc}<{pre}{cipher},Engine.BouncyCastle.BCCurve{ec}, {hash}>(HandshakePattern.{pattern},{fmodifiers},s);
 
     }}
 ");
