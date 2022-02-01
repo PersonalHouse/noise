@@ -21,7 +21,7 @@ namespace TestHelper
         {
 
         }
-
+        bool ignoreNoisePSK = false;
         public void Execute(GeneratorExecutionContext context)
         {
             context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.MSBuildProjectDirectory", out var projectDirectory);
@@ -86,6 +86,8 @@ namespace PortableNoise.Tests
             s = File.ReadAllText(Path.Combine(projectDirectory, "Vectors/noise-c-fallback.txt"));
             GenerateTests(s, sb, "_fb", "CoreTestFallback");
 
+            ignoreNoisePSK = true;
+
             s = File.ReadAllText(Path.Combine(projectDirectory, "Vectors/c/cacophony.txt"));
             GenerateTests(s, sb, "_ncacophony", "CoreTest");
 
@@ -102,7 +104,7 @@ namespace PortableNoise.Tests
             context.AddSource("NoiseTest.Generated.cs", sb.ToString());
         }
 
-        private static void GenerateTests(string s, StringBuilder sb,string postfix,string testfunc)
+        private void GenerateTests(string s, StringBuilder sb,string postfix,string testfunc)
         {
             var json = JObject.Parse(s);
             if (true)
@@ -113,6 +115,11 @@ namespace PortableNoise.Tests
 
                     var protarr = protocolName.Split('_');
 
+                    
+                    if (ignoreNoisePSK && (protarr[0].StartsWith("noisepsk",true,System.Globalization.CultureInfo.InvariantCulture)))
+                    {//noise-c has noisepsk protocol, which is incompatible with noise protocol
+                        return;
+                    }
 
                     var next = protarr[1];
                     var pattern = next.Length > 1 && char.IsUpper(next[1]) ? next.Substring(0, 2) : next.Substring(0, 1);

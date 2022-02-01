@@ -235,10 +235,15 @@ namespace BCvsSodium
         }
         static void Main(string[] args)
         {
-//             var p = new Program();
-//             p.BCChaCha20Poly1305();
-//             return;
-            BenchmarkDotNet.Running.BenchmarkRunner.Run<Program>();
+            //             var p = new Program();
+            //             p.BCChaCha20Poly1305();
+            //             return;
+            //BenchmarkDotNet.Running.BenchmarkRunner.Run<Program>();
+            BenchmarkDotNet.Running.BenchmarkRunner.Run<TestNoisenet>();
+
+//              var c = new TestNoisenet();
+//              c.Noisenet();
+//              c.PortableNoiseLibsodium();
         }
     }
 }

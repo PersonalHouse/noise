@@ -30,11 +30,6 @@ namespace PortableNoise.Tests
 
             var protocolName = GetString(vector, "protocol_name");
 
-            if (protocolName.Contains("448"))
-            {
-                var nnn = 1 + 1;
-            }
-
             var protarr = protocolName.Split('_');
             bool issinglepsk = false;
             if (string.Compare(protarr[0], "noisepsk", true) == 0)
@@ -62,7 +57,7 @@ namespace PortableNoise.Tests
                 initPsks = new List<byte[]> { initPsk };
                 respPsks = new List<byte[]> { respPsk };
 
-                protocol = new Protocol<CipherType, DHType, HashType>(handshake, pattern|PatternModifiers.Psk0);
+                protocol = new Protocol<CipherType, DHType, HashType>(handshake, pattern|PatternModifiers.Psk2);
             }else
             {
                 protocol = new Protocol<CipherType, DHType, HashType>(handshake, pattern);
@@ -86,7 +81,7 @@ namespace PortableNoise.Tests
 
             foreach (var message in vector["messages"])
             {
-                var payload = GetBytes2(message, "payload");
+                var payload =GetSeq(GetBytes(message, "payload"));
                 var ciphertext = GetBytes(message, "ciphertext");
 
                 ReadOnlySequence<byte> initMessage;
@@ -112,7 +107,7 @@ namespace PortableNoise.Tests
                     respMessage = respBuffer.AsSpan(0, respMessageSize);
                 }
 
-                //Assert.Equal(ciphertext, initMessage.ToArray());
+                Assert.Equal(ciphertext, initMessage.ToArray());
                 Assert.Equal(payload.ToArray(), respMessage.ToArray());
 
                 Swap(ref initBuffer, ref respBuffer);
@@ -137,6 +132,11 @@ namespace PortableNoise.Tests
             respTransport.Dispose();
         }
 
+        private object GetSeq(byte[] vs)
+        {
+            var seq = new ReadOnlySequence<byte>();
+            seq.
+        }
 
         private void CoreTestFallback<CipherType, DHType, HashType>(HandshakePattern handshake, PatternModifiers pattern, string content)
                 where CipherType : Cipher, new()
@@ -364,10 +364,10 @@ namespace PortableNoise.Tests
         {
             return Hex.Decode(GetString(token, property));
         }
-        private static ReadOnlySequence<byte> GetBytes2(JToken token, string property)
-        {
-            return new ReadOnlySequence<byte>(Hex.Decode(GetString(token, property)));
-        }
+//         private static ReadOnlySequence<byte> GetBytes2(JToken token, string property)
+//         {
+//             return new ReadOnlySequence<byte>(Hex.Decode(GetString(token, property)));
+//         }
 
         private static List<byte[]> GetPsks(JToken token, string property)
         {

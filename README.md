@@ -1,15 +1,13 @@
-PortableNoise is a fork of [Noise.Net]
+# PortableNoise is a fork of [Noise.Net]
 
 [Noise.Net]: https://github.com/Metalnem/noise
 
-[![Latest Version](https://img.shields.io/nuget/v/Noise.NET.svg)](https://www.nuget.org/packages/Noise.NET)
-[![Build Status](https://travis-ci.org/Metalnem/noise.svg?branch=master)](https://travis-ci.org/Metalnem/noise)
-[![Build status](https://ci.appveyor.com/api/projects/status/aw4y7rackgepjy8u?svg=true)](https://ci.appveyor.com/project/Metalnem/noise)
-[![Docs](https://img.shields.io/badge/docs-API-orange.svg?style=flat)](https://metalnem.github.io/noise/api/Noise.html)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/metalnem/noise/master/LICENSE)
+
 
 .NET Standard 2.0 implementation of the [Noise Protocol Framework](https://noiseprotocol.org/)
-(revision 33 of the [spec](https://noiseprotocol.org/noise.html)). Noise.Net features:
+(revision 33 of the [spec](https://noiseprotocol.org/noise.html)). 
+
+Noise.Net features:
 
 - AESGCM and ChaChaPoly ciphers
 - Curve25519 Diffie-Hellman function
@@ -46,11 +44,26 @@ PortableNoise additional:
   - The max message size is a setting value now. Noise protocol has 64k limitation on the max message size and [Noise.Net](https://github.com/Metalnem/noise) implement it as a constant. The default setting value of Portable.Noise is 64k, which is compatible with Noise protocol.
   - Merge "Out of order" from [Zetanova](https://github.com/Zetanova/noise/tree/out-of-order-counter)
   - Add helper functions (GetEncryptedMessageSize,GetDecryptedMessageSize)
-  - [Noise.Net] supports parsing protocol name at runtime, but PortableNoise not. If crypto parameters is unknown at build time, You can use table lookup to support this requirement.
-  - Change input message type from ReadOnlySpan to ReadOnlySequence, to reduce memory copy
+  - [Noise.Net] supports parsing protocol name at runtime, but PortableNoise not. If crypto parameters are unknown at build time, You can use table lookup to support this requirement.
+  - Change input message type from ReadOnlySpan to ReadOnlySequence.
+  - BouncyCastle doesn't support Span, therefore Span usages has been limited, which make performance downgrade. The following is the benchmark of 100K messages.
+
+    |                       Method |     Mean |   Error |  StdDev |
+    |----------------------------- |---------:|--------:|--------:|
+    |                     Noisenet | 158.6 ms | 0.12 ms | 0.10 ms |
+    |       PortableNoiseLibsodium | 175.3 ms | 0.54 ms | 0.51 ms |
+    |    PortableNoiseBouncyCastle | 500.3 ms | 1.40 ms | 1.25 ms |
+    | PortableNoiseBouncyCastle448 | 493.2 ms | 0.64 ms | 0.56 ms |
+
+    BouncyCastle said Span may be added recently.https://github.com/bcgit/bc-csharp/issues/339
+    
+    PortableNoise api may be changed after BouncyCastle releases new version.
+
+
 
 Todo:
-[Noise.Net] keeps s and psk in memory. we'll replace with call back functions.
+
+- [Noise.Net] keeps s and psk in memory. we'll replace with call back functions.
 
 
 

@@ -6,7 +6,7 @@
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
     <PackageId>Portable.Noise</PackageId>
     <Title>Portable.Noise</Title>
-    <PackageVersion>1.1.0</PackageVersion>
+    <PackageVersion>1.2.0</PackageVersion>
     <Authors>Qi Feng</Authors>
     <PackageProjectUrl>https://github.com/PersonalHouse/noise</PackageProjectUrl>
     <RepositoryUrl>https://github.com/PersonalHouse/noise</RepositoryUrl>
