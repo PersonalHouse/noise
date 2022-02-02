@@ -20,7 +20,7 @@ Noise.Net features:
 [interactive]: https://noiseprotocol.org/noise.html#interactive-handshake-patterns-fundamental
 
 PortableNoise additional:
-+ Multiple crypto libraries support. Currently support Libsodium and BouncyCastle.
++ Multiple crypto libraries support. Currently supports Libsodium and BouncyCastle.
   - Libsodium performances better.
 
     |                           Method |       Mean |    Error |   StdDev |
@@ -35,35 +35,36 @@ PortableNoise additional:
     |                  LibsodiumAESGCM |   354.6 ns |  1.20 ns |  1.12 ns |
 
 
-  - BouncyCastle has more functionalities. And interoperates better with Dotnet.
-  - You could use them together. And you could use your implement to replace one or more cryto function.
+  - BouncyCastle has more functionalities and interoperates better with Dotnet.
 
-+ The 448 DH functions support.
++ The X448 DH functions support.
 + Support IOS and Android if using BouncyCastle.
 + Refactoring:
-  - The max message size is a setting value now. Noise protocol has 64k limitation on the max message size and [Noise.Net](https://github.com/Metalnem/noise) implement it as a constant. The default setting value of Portable.Noise is 64k, which is compatible with Noise protocol.
+  - The max message size is a setting now. There is 64k limitation on the max message size and [Noise.Net](https://github.com/Metalnem/noise) implement it as a constant. The default setting value of Portable.Noise is 64k, which is compatible with Noise protocol.
   - Merge "Out of order" from [Zetanova](https://github.com/Zetanova/noise/tree/out-of-order-counter)
   - Add helper functions (GetEncryptedMessageSize,GetDecryptedMessageSize)
-  - [Noise.Net] supports parsing protocol name at runtime, but PortableNoise not. If crypto parameters are unknown at build time, You can use table lookup to support this requirement.
+  - [Noise.Net] supports parsing protocol name at runtime, but PortableNoise not. If crypto parameters are unknown at build time, Table lookup could be used to support this requirement.
   - Change input message type from ReadOnlySpan to ReadOnlySequence.
   - BouncyCastle doesn't support Span, therefore Span usages has been limited, which make performance downgrade. The following is the benchmark of 100K messages.
 
-    |                       Method |     Mean |   Error |  StdDev |
-    |----------------------------- |---------:|--------:|--------:|
-    |                     Noisenet | 158.6 ms | 0.12 ms | 0.10 ms |
-    |       PortableNoiseLibsodium | 175.3 ms | 0.54 ms | 0.51 ms |
-    |    PortableNoiseBouncyCastle | 500.3 ms | 1.40 ms | 1.25 ms |
-    | PortableNoiseBouncyCastle448 | 493.2 ms | 0.64 ms | 0.56 ms |
+	|                                          Method |       Mean |   Error |  StdDev |
+	|------------------------------------------------ |-----------:|--------:|--------:|
+	|                                        Noisenet |   673.8 ms | 1.25 ms | 1.04 ms |
+	|                          PortableNoiseLibsodium |   724.5 ms | 3.16 ms | 2.95 ms |
+	|                       PortableNoiseBouncyCastle | 3,401.2 ms | 4.03 ms | 3.77 ms |
+	|                    PortableNoiseBouncyCastle448 | 3,396.8 ms | 5.27 ms | 4.68 ms |
+	| PortableNoiseBouncyCastle448MultipleSegBaseline | 3,177.9 ms | 8.97 ms | 8.39 ms |
+	|         PortableNoiseBouncyCastle448MultipleSeg | 1,701.1 ms | 3.99 ms | 3.73 ms |
 
     BouncyCastle said Span may be added recently.https://github.com/bcgit/bc-csharp/issues/339
     
-    PortableNoise api may be changed after BouncyCastle releases new version.
+    PortableNoise Api may be changed after BouncyCastle releases new version.
 
 
 
 Todo:
 
-- [Noise.Net] keeps s and psk in memory. we'll replace with call back functions.
+- [Noise.Net] keeps private key and psk in memory. We'll replace with call back functions.
 
 
 

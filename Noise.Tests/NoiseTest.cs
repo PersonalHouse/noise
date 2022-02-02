@@ -132,10 +132,17 @@ namespace PortableNoise.Tests
             respTransport.Dispose();
         }
 
-        private object GetSeq(byte[] vs)
+        private ReadOnlySequence<byte> GetSeq(byte[] vs)
         {
-            var seq = new ReadOnlySequence<byte>();
-            seq.
+            var sn = Random.Shared.Next(0,vs.Length+1);
+            if ((sn==0)|| (sn == vs.Length))
+            {
+                return new ReadOnlySequence<byte>(vs);
+            }
+            var ms = new MemorySegment<byte>(vs,0,sn);
+            var last = ms.Append(new MemorySegment<byte>(vs.AsMemory(sn)));
+            var seq = new ReadOnlySequence<byte>(ms,0, last, last.Memory.Length);
+            return seq;
         }
 
         private void CoreTestFallback<CipherType, DHType, HashType>(HandshakePattern handshake, PatternModifiers pattern, string content)
@@ -186,7 +193,7 @@ namespace PortableNoise.Tests
 
             foreach (var message in vector["messages"])
             {
-                var payload = GetBytes2(message, "payload");
+                var payload = GetSeq(GetBytes(message, "payload"));
                 var ciphertext = GetBytes(message, "ciphertext");
 
                 ReadOnlySequence<byte> initMessage;
