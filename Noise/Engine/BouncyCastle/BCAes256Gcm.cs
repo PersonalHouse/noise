@@ -20,6 +20,8 @@ namespace PortableNoise.Engine.BouncyCastle
     /// </summary>
     public sealed class BCAes256Gcm : Aes256Gcm
     {
+
+        GcmBlockCipher cipher = new GcmBlockCipher(new AesEngine());
         public int Encrypt(byte[] k, ulong n, byte[] ad, ReadOnlySequence<byte> plaintexts, Memory<byte> ciphertext)
         {
             Debug.Assert(k.Length == Aead.KeySize);
@@ -28,7 +30,6 @@ namespace PortableNoise.Engine.BouncyCastle
             var nonce = new byte[Aead.NonceSize];
             BinaryPrimitives.WriteUInt64BigEndian(nonce.AsSpan().Slice(4), n);
 
-            var cipher = new GcmBlockCipher(new AesEngine());
             var parameters = new AeadParameters(new KeyParameter(k), Aead.TagSize * 8, nonce, ad);
             cipher.Init(true, parameters);
 
@@ -70,7 +71,6 @@ namespace PortableNoise.Engine.BouncyCastle
             var nonce = new byte[Aead.NonceSize];
             BinaryPrimitives.WriteUInt64BigEndian(nonce.AsSpan().Slice(4), n);
 
-            var cipher = new GcmBlockCipher(new AesEngine());
             var parameters = new AeadParameters(new KeyParameter(k), Aead.TagSize * 8, nonce, ad);
             cipher.Init(false, parameters);
 

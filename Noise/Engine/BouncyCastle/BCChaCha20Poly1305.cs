@@ -17,6 +17,11 @@ namespace PortableNoise.Engine.BouncyCastle
     /// </summary>
     public sealed class BCChaCha20Poly1305 : ChaCha20Poly1305
     {
+        Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305 cipher = new Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305();
+        public BCChaCha20Poly1305()
+        {
+
+        }
 
         public int Encrypt(byte[] k, ulong n, byte[] ad, ReadOnlySequence<byte> plaintexts, Memory<byte> ciphertext)
         {
@@ -26,7 +31,7 @@ namespace PortableNoise.Engine.BouncyCastle
             var nonce = new byte[Aead.NonceSize];
             BinaryPrimitives.WriteUInt64LittleEndian(nonce.AsSpan().Slice(4), n);
 
-            var cipher = new Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305();
+            //var cipher = new Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305();
             var parameters = new AeadParameters(new KeyParameter(k), Aead.TagSize * 8, nonce, ad);
             cipher.Init(true, parameters);
 
@@ -68,7 +73,7 @@ namespace PortableNoise.Engine.BouncyCastle
             var nonce = new byte[Aead.NonceSize];
             BinaryPrimitives.WriteUInt64LittleEndian(nonce.AsSpan().Slice(4), n);
 
-            var cipher = new Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305();
+            //var cipher = new Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305();
             var parameters = new AeadParameters(new KeyParameter(k), Aead.TagSize * 8, nonce, ad);
             cipher.Init(false, parameters);
 

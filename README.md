@@ -45,16 +45,16 @@ PortableNoise additional:
   - Add helper functions (GetEncryptedMessageSize,GetDecryptedMessageSize)
   - [Noise.Net] supports parsing protocol name at runtime, but PortableNoise not. If crypto parameters are unknown at build time, Table lookup could be used to support this requirement.
   - Change input message type from ReadOnlySpan to ReadOnlySequence.
-  - BouncyCastle doesn't support Span, therefore Span usages has been limited, which make performance downgrade. The following is the benchmark of 100K messages.
+  - BouncyCastle doesn't support Span, therefore Span usages has been limited, which makes performance downgrade. The following is the benchmark of 100K messages.
 
-	|                                          Method |       Mean |   Error |  StdDev |
-	|------------------------------------------------ |-----------:|--------:|--------:|
-	|                                        Noisenet |   673.8 ms | 1.25 ms | 1.04 ms |
-	|                          PortableNoiseLibsodium |   724.5 ms | 3.16 ms | 2.95 ms |
-	|                       PortableNoiseBouncyCastle | 3,401.2 ms | 4.03 ms | 3.77 ms |
-	|                    PortableNoiseBouncyCastle448 | 3,396.8 ms | 5.27 ms | 4.68 ms |
-	| PortableNoiseBouncyCastle448MultipleSegBaseline | 3,177.9 ms | 8.97 ms | 8.39 ms |
-	|         PortableNoiseBouncyCastle448MultipleSeg | 1,701.1 ms | 3.99 ms | 3.73 ms |
+  |                                          Method |       Mean |    Error |  StdDev |
+  |------------------------------------------------ |-----------:|---------:|--------:|
+  |                                        Noisenet |   671.2 ms |  0.87 ms | 0.73 ms |
+  |                          PortableNoiseLibsodium |   715.3 ms |  1.55 ms | 1.29 ms |
+  |                       PortableNoiseBouncyCastle | 3,295.2 ms |  4.17 ms | 3.70 ms |
+  |                    PortableNoiseBouncyCastle448 | 3,325.1 ms | 10.73 ms | 8.96 ms |
+  | PortableNoiseBouncyCastle448MultipleSegBaseline | 3,063.1 ms |  5.04 ms | 4.71 ms |
+  |         PortableNoiseBouncyCastle448MultipleSeg | 1,655.0 ms |  2.26 ms | 2.01 ms |
 
     BouncyCastle said Span may be added recently.https://github.com/bcgit/bc-csharp/issues/339
     
