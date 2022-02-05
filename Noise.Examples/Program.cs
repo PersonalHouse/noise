@@ -66,22 +66,28 @@ namespace PortableNoise.Examples
 
 				// Receive the second handshake message from the server.
 				var received = await serverToClient.Receive();
-				var (_, _, transport) = handshakeState.ReadMessage(new ReadOnlySequence<byte>(received), buffer);
+                var lis =new List<ArraySegment<byte>>();
+                lis.Add(received);
+                var (_, _, transport) = handshakeState.ReadMessage(lis, buffer);
 
 				// Handshake complete, switch to transport mode.
 				using (transport)
 				{
 					foreach (var message in messages)
 					{
-						Memory<byte> request = Encoding.UTF8.GetBytes(message);
+						var request = Encoding.UTF8.GetBytes(message);
 
-						// Send the message to the server.
-						bytesWritten = transport.WriteMessage(new ReadOnlySequence<byte>(request), buffer);
+                        // Send the message to the server.
+                        lis.Clear();
+                        lis.Add(request);
+                        bytesWritten = transport.WriteMessage(lis, buffer);
 						await clientToServer.Send(Slice(buffer, bytesWritten));
 
 						// Receive the response and print it to the standard output.
 						var response = await serverToClient.Receive();
-						var bytesRead = transport.ReadMessage(new ReadOnlySequence<byte>(response), buffer);
+                        lis.Clear();
+                        lis.Add(response);
+                        var bytesRead = transport.ReadMessage(lis, buffer);
 
 						Console.WriteLine(Encoding.UTF8.GetString(Slice(buffer, bytesRead)));
 					}
@@ -97,7 +103,9 @@ namespace PortableNoise.Examples
 			{
 				// Receive the first handshake message from the client.
 				var received = await clientToServer.Receive();
-				handshakeState.ReadMessage(new ReadOnlySequence<byte>(received), buffer);
+                var lis = new List<ArraySegment<byte>>();
+                lis.Add(received);
+                handshakeState.ReadMessage(lis, buffer);
 
 				// Send the second handshake message to the client.
 				var (bytesWritten, _, transport) = handshakeState.WriteMessage(null, buffer);
@@ -110,10 +118,14 @@ namespace PortableNoise.Examples
 					{
 						// Receive the message from the client.
 						var request = await clientToServer.Receive();
-						var bytesRead = transport.ReadMessage(new ReadOnlySequence<byte>(request), buffer);
+                        lis.Clear();
+                        lis.Add(request);
+                        var bytesRead = transport.ReadMessage(lis, buffer);
 
-						// Echo the message back to the client.
-						bytesWritten = transport.WriteMessage(new ReadOnlySequence<byte>(Slice(buffer, bytesRead)), buffer);
+                        // Echo the message back to the client.
+                        lis.Clear();
+                        lis.Add(Slice(buffer, bytesRead));
+                        bytesWritten = transport.WriteMessage(lis, buffer);
 						await serverToClient.Send(Slice(buffer, bytesWritten));
 					}
 				}

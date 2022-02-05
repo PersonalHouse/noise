@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace PortableNoise
@@ -75,7 +76,7 @@ namespace PortableNoise
 			hash.GetHashAndReset(h);
 		}
 
-        public void MixHash(ReadOnlySequence<byte> data)
+        public void MixHash(IList<ArraySegment<byte>> data)
         {
             hash.AppendData(h);
             foreach (var item in data)
@@ -121,7 +122,7 @@ namespace PortableNoise
 		/// Sets ciphertext = EncryptWithAd(h, plaintext),
 		/// calls MixHash(ciphertext), and returns ciphertext.
 		/// </summary>
-		public int EncryptAndHash(ReadOnlySequence<byte> plaintext, Memory<byte> ciphertext)
+		public int EncryptAndHash(IList<ArraySegment<byte>> plaintext, Memory<byte> ciphertext)
 		{
 			int bytesWritten = state.EncryptWithAd(h, plaintext, ciphertext, out _);
 			MixHash(ciphertext.Slice(0, bytesWritten));
@@ -133,7 +134,7 @@ namespace PortableNoise
 		/// Sets ciphertext = EncryptWithAd(h, plaintext),
 		/// calls MixHash(ciphertext), and returns ciphertext and nonce used.
 		/// </summary>
-		public int EncryptAndHash(ReadOnlySequence<byte> plaintext, Memory<byte> ciphertext, out ulong nonce)
+		public int EncryptAndHash(IList<ArraySegment<byte>> plaintext, Memory<byte> ciphertext, out ulong nonce)
 		{
 			int bytesWritten = state.EncryptWithAd(h, plaintext, ciphertext, out nonce);
 			MixHash(ciphertext.Slice(0, bytesWritten));
@@ -145,7 +146,7 @@ namespace PortableNoise
 		/// Sets plaintext = DecryptWithAd(h, ciphertext),
 		/// calls MixHash(ciphertext), and returns plaintext.
 		/// </summary>
-		public int DecryptAndHash(ReadOnlySequence<byte> ciphertexts, Memory<byte> plaintext)
+		public int DecryptAndHash(IList<ArraySegment<byte>> ciphertexts, Memory<byte> plaintext)
 		{
 			var bytesRead = state.DecryptWithAd(h, ciphertexts, plaintext);
             MixHash(ciphertexts);
@@ -157,7 +158,7 @@ namespace PortableNoise
 		/// Sets plaintext = DecryptWithNonceAndAd(n, h, ciphertext),
 		/// calls MixHash(ciphertext), and returns plaintext.
 		/// </summary>
-		public int DecryptAndHash(ulong nonce, ReadOnlySequence<byte> ciphertexts, Memory<byte> plaintext)
+		public int DecryptAndHash(ulong nonce, IList<ArraySegment<byte>> ciphertexts, Memory<byte> plaintext)
 		{
 			var bytesRead = state.DecryptWithNonceAndAd(nonce, h, ciphertexts, plaintext);
 

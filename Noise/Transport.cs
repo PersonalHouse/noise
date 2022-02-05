@@ -1,6 +1,8 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace PortableNoise
 {
@@ -42,14 +44,8 @@ namespace PortableNoise
         /// Thrown if the encrypted payload was greater than <see cref="Protocol.MaxMessageLength"/>
         /// bytes in length, or if the output buffer did not have enough space to hold the ciphertext.
         /// </exception>
-        int WriteMessage(ReadOnlySequence<byte> payload, Memory<byte> messageBuffer);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="messageBuffer"></param>
-        /// <returns></returns>
-        int WriteMessage(ReadOnlyMemory<byte> payload, Memory<byte> messageBuffer);
+        int WriteMessage(IList<ArraySegment<byte>> payload, Memory<byte> messageBuffer);
+
 
         /// <summary>
         /// Encrypts the <paramref name="payload"/> and writes the result into <paramref name="messageBuffer"/>.
@@ -68,16 +64,8 @@ namespace PortableNoise
         /// Thrown if the encrypted payload was greater than <see cref="Protocol.MaxMessageLength"/>
         /// bytes in length, or if the output buffer did not have enough space to hold the ciphertext.
         /// </exception>
-        int WriteMessage(ReadOnlySequence<byte> payload, Memory<byte> messageBuffer, out ulong counter);
+        int WriteMessage(IList<ArraySegment<byte>> payload, Memory<byte> messageBuffer, out ulong counter);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="messageBuffer"></param>
-        /// <param name="counter"></param>
-        /// <returns></returns>
-        int WriteMessage(ReadOnlyMemory<byte> payload, Memory<byte> messageBuffer, out ulong counter);
 
 
         /// <summary>
@@ -106,14 +94,8 @@ namespace PortableNoise
         /// <exception cref="System.Security.Cryptography.CryptographicException">
         /// Thrown if the decryption of the message has failed.
         /// </exception>
-        int ReadMessage(ReadOnlySequence<byte> message, Memory<byte> payloadBuffer);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="payloadBuffer"></param>
-        /// <returns></returns>
-        int ReadMessage(ReadOnlyMemory<byte> message, Memory<byte> payloadBuffer);
+        int ReadMessage(IList<ArraySegment<byte>> message, Memory<byte> payloadBuffer);
+
 
         /// <summary>
         /// Decrypts the <paramref name="message"/> and writes the result into <paramref name="payloadBuffer"/>.
@@ -135,15 +117,8 @@ namespace PortableNoise
         /// <exception cref="System.Security.Cryptography.CryptographicException">
         /// Thrown if the decryption of the message has failed.
         /// </exception>
-        int ReadMessage(ulong counter, ReadOnlySequence<byte> message, Memory<byte> payloadBuffer);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="counter"></param>
-        /// <param name="message"></param>
-        /// <param name="payloadBuffer"></param>
-        /// <returns></returns>
-        int ReadMessage(ulong counter, ReadOnlyMemory<byte> message, Memory<byte> payloadBuffer);
+        int ReadMessage(ulong counter, IList<ArraySegment<byte>> message, Memory<byte> payloadBuffer);
+
 
         /// <summary>
         /// Updates the symmetric key used to encrypt transport messages from
@@ -199,11 +174,8 @@ namespace PortableNoise
             return payloadSize  + Aead.TagSize;
         }
 
-        public int WriteMessage(ReadOnlyMemory<byte> payload, Memory<byte> messageBuffer, out ulong counter)
-        {
-            return WriteMessage(new ReadOnlySequence<byte>(payload), messageBuffer, out counter);
-        }
-        public int WriteMessage(ReadOnlySequence<byte> payload, Memory<byte> messageBuffer, out ulong counter)
+
+        public int WriteMessage(IList<ArraySegment<byte>> payload, Memory<byte> messageBuffer, out ulong counter)
 		{
 			Exceptions.ThrowIfDisposed(disposed, nameof(Transport<CipherType>));
 
@@ -211,13 +183,19 @@ namespace PortableNoise
 			{
 				throw new InvalidOperationException("Responder cannot write messages to a one-way stream.");
 			}
+            if (payload==null)
+            {
+                payload = new List<ArraySegment<byte>>();
+            }
 
-			if (payload.Length + Aead.TagSize > Protocol.MaxMessageLength)
+            var t = payload.Total() + Aead.TagSize;
+
+            if ( t > Protocol.MaxMessageLength)
 			{
 				throw new ArgumentException($"Noise message must be less than or equal to {Protocol.MaxMessageLength} bytes in length.");
 			}
 
-			if (payload.Length + Aead.TagSize > messageBuffer.Length)
+			if (t > messageBuffer.Length)
 			{
 				throw new ArgumentException("Message buffer does not have enough space to hold the ciphertext.");
 			}
@@ -228,26 +206,18 @@ namespace PortableNoise
 			return cipher.EncryptWithAd(null, payload, messageBuffer, out counter);
 		}
 
-		public int WriteMessage(ReadOnlySequence<byte> payload, Memory<byte> messageBuffer)
+		public int WriteMessage(IList<ArraySegment<byte>> payload, Memory<byte> messageBuffer)
 		{
 			return WriteMessage(payload, messageBuffer, out _);
 		}
 
-        public int WriteMessage(ReadOnlyMemory<byte> payload, Memory<byte> messageBuffer)
-        {
-            return WriteMessage(new ReadOnlySequence<byte>(payload), messageBuffer, out _);
-        }
 
         public int GetDecryptedMessageSize(int msgSize)
         {
             return msgSize - Aead.TagSize;
         }
 
-        public int ReadMessage(ReadOnlyMemory<byte> message, Memory<byte> payloadBuffer)
-        {
-            return ReadMessage(new ReadOnlySequence<byte>(message), payloadBuffer);
-        }
-        public int ReadMessage(ReadOnlySequence<byte> message, Memory<byte> payloadBuffer)
+        public int ReadMessage(IList<ArraySegment<byte>> message, Memory<byte> payloadBuffer)
 		{
 			Exceptions.ThrowIfDisposed(disposed, nameof(Transport<CipherType>));
 
@@ -256,17 +226,17 @@ namespace PortableNoise
 				throw new InvalidOperationException("Initiator cannot read messages from a one-way stream.");
 			}
 
-			if (message.Length > Protocol.MaxMessageLength)
+			if (message.Total() > Protocol.MaxMessageLength)
 			{
 				throw new ArgumentException($"Noise message must be less than or equal to {Protocol.MaxMessageLength} bytes in length.");
 			}
 
-			if (message.Length < Aead.TagSize)
+			if (message.Total() < Aead.TagSize)
 			{
 				throw new ArgumentException($"Noise message must be greater than or equal to {Aead.TagSize} bytes in length.");
 			}
 
-			if (message.Length - Aead.TagSize > payloadBuffer.Length)
+			if (message.Total() - Aead.TagSize > payloadBuffer.Length)
 			{
 				throw new ArgumentException("Payload buffer does not have enough space to hold the plaintext.");
 			}
@@ -277,12 +247,7 @@ namespace PortableNoise
 			return cipher.DecryptWithAd(null, message, payloadBuffer);
 		}
 
-        public int ReadMessage(ulong counter, ReadOnlyMemory<byte> message, Memory<byte> payloadBuffer)
-        {
-            return ReadMessage(counter,new ReadOnlySequence<byte>(message), payloadBuffer);
-        }
-
-        public int ReadMessage(ulong counter, ReadOnlySequence<byte> message, Memory<byte> payloadBuffer)
+        public int ReadMessage(ulong counter, IList<ArraySegment<byte>> message, Memory<byte> payloadBuffer)
 		{
 			Exceptions.ThrowIfDisposed(disposed, nameof(Transport<CipherType>));
 
@@ -291,17 +256,17 @@ namespace PortableNoise
 				throw new InvalidOperationException("Initiator cannot read messages from a one-way stream.");
 			}
 
-			if (message.Length > Protocol.MaxMessageLength)
+			if (message.Total() > Protocol.MaxMessageLength)
 			{
 				throw new ArgumentException($"Noise message must be less than or equal to {Protocol.MaxMessageLength} bytes in length.");
 			}
 
-			if (message.Length < Aead.TagSize)
+			if (message.Total() < Aead.TagSize)
 			{
 				throw new ArgumentException($"Noise message must be greater than or equal to {Aead.TagSize} bytes in length.");
 			}
 
-			if (message.Length - Aead.TagSize > payloadBuffer.Length)
+			if (message.Total() - Aead.TagSize > payloadBuffer.Length)
 			{
 				throw new ArgumentException("Payload buffer does not have enough space to hold the plaintext.");
 			}

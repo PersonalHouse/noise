@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 
 namespace PortableNoise
 {
@@ -17,7 +18,7 @@ namespace PortableNoise
         /// associated data ad and results in a ciphertext that is the
         /// same size as the plaintext plus 16 bytes for authentication data.
         /// </summary>
-        int Encrypt(byte[] k, ulong n, byte[] ad, ReadOnlySequence<byte> plaintexts, Memory<byte> ciphertext);
+        int Encrypt(byte[] k, ulong n, byte[] ad, IList<ArraySegment<byte>> plaintexts, Memory<byte> ciphertext);
 
 
 
@@ -28,6 +29,6 @@ namespace PortableNoise
         /// number of bytes read, unless authentication fails, in which
         /// case an error is signaled to the caller.
         /// </summary>
-        int Decrypt(byte[] k, ulong n, byte[] ad, ReadOnlySequence<byte> ciphertexts, Memory<byte> plaintext);
+        int Decrypt(byte[] k, ulong n, byte[] ad, IList<ArraySegment<byte>> ciphertexts, Memory<byte> plaintext);
 	}
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
@@ -23,10 +25,10 @@ namespace PortableNoise.Engine.BouncyCastle
 
         }
 
-        public int Encrypt(byte[] k, ulong n, byte[] ad, ReadOnlySequence<byte> plaintexts, Memory<byte> ciphertext)
+        public int Encrypt(byte[] k, ulong n, byte[] ad, IList<ArraySegment<byte>> plaintexts, Memory<byte> ciphertext)
         {
             Debug.Assert(k.Length == Aead.KeySize);
-            Debug.Assert(ciphertext.Length >= plaintexts.Length + Aead.TagSize);
+            Debug.Assert(ciphertext.Length >= plaintexts.Total() + Aead.TagSize);
 
             var nonce = new byte[Aead.NonceSize];
             BinaryPrimitives.WriteUInt64LittleEndian(nonce.AsSpan().Slice(4), n);
@@ -44,12 +46,9 @@ namespace PortableNoise.Engine.BouncyCastle
             {
                 //Generate Cipher Text With Auth Tag            
                 var t = 0;
-                foreach (var plaintext in plaintexts)
+                for (var i = 0; i < plaintexts.Count; i++)
                 {
-                    if (!MemoryMarshal.TryGetArray(plaintext, out ArraySegment<byte> arraySegment))
-                    {
-                        throw new InvalidOperationException("Buffer backed by array was expected");
-                    }
+                    var arraySegment = plaintexts[i];
                     var len = cipher.ProcessBytes(arraySegment.Array, arraySegment.Offset, arraySegment.Count, asciphertext.Array, t + asciphertext.Offset);
                     t += len;
                 }
@@ -63,11 +62,11 @@ namespace PortableNoise.Engine.BouncyCastle
             }
         }
 
-        public int Decrypt(byte[] k, ulong n, byte[] ad, ReadOnlySequence<byte> ciphertexts, Memory<byte> plaintext)
+        public int Decrypt(byte[] k, ulong n, byte[] ad, IList<ArraySegment<byte>> ciphertexts, Memory<byte> plaintext)
         {
             Debug.Assert(k.Length == Aead.KeySize);
-            Debug.Assert(ciphertexts.Length >= Aead.TagSize);
-            Debug.Assert(plaintext.Length >= ciphertexts.Length - Aead.TagSize);
+            Debug.Assert(ciphertexts.Total() >= Aead.TagSize);
+            Debug.Assert(plaintext.Length >= ciphertexts.Total() - Aead.TagSize);
 
 
             var nonce = new byte[Aead.NonceSize];
@@ -86,12 +85,9 @@ namespace PortableNoise.Engine.BouncyCastle
             try
             {
                 var t = 0;
-                foreach (var ciphertext in ciphertexts)
+                for (var i = 0; i < ciphertexts.Count; i++)
                 {
-                    if (!MemoryMarshal.TryGetArray(ciphertext, out ArraySegment<byte> arraySegment))
-                    {
-                        throw new InvalidOperationException("Buffer backed by array was expected");
-                    }
+                    var arraySegment = ciphertexts[i];
                     var len = cipher.ProcessBytes(arraySegment.Array, arraySegment.Offset, arraySegment.Count, asplaintext.Array, asplaintext.Offset + t);
                     t += len;
                 }

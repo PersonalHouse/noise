@@ -18,8 +18,8 @@ namespace BCvsSodium
         ulong n = 1;
         byte[] k = new byte[32];
         byte[] nonce = new byte[12];
-        byte[] ad=new byte[32];
-        byte[] tag=new byte[32];
+        byte[] ad = new byte[32];
+        byte[] tag = new byte[32];
 
         Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305 bccipher = new Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305();
         Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305 bccipher2 = new Org.BouncyCastle.Crypto.Modes.ChaCha20Poly1305();
@@ -40,9 +40,9 @@ namespace BCvsSodium
             ++n;
             BinaryPrimitives.WriteUInt64LittleEndian(nonce.AsSpan().Slice(4), n);
             var parameters = new AeadParameters(new KeyParameter(k), 16 * 8, nonce);
-            bccipher.Init(true, parameters);            
-            var len = bccipher.ProcessBytes(data, 0, data.Length, Buffer,0);
-            bccipher.DoFinal(Buffer,len);
+            bccipher.Init(true, parameters);
+            var len = bccipher.ProcessBytes(data, 0, data.Length, Buffer, 0);
+            bccipher.DoFinal(Buffer, len);
         }
 
         [Benchmark]
@@ -235,15 +235,10 @@ namespace BCvsSodium
         }
         static void Main(string[] args)
         {
-            //             var p = new Program();
-            //             p.BCChaCha20Poly1305();
-            //             return;
             //BenchmarkDotNet.Running.BenchmarkRunner.Run<Program>();
             BenchmarkDotNet.Running.BenchmarkRunner.Run<TestNoisenet>();
+            return;
 
-//              var c = new TestNoisenet();
-//              c.Noisenet();
-//              c.PortableNoiseLibsodium();
         }
     }
 }

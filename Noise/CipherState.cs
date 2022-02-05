@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace PortableNoise
@@ -55,7 +56,7 @@ namespace PortableNoise
         /// Otherwise copies the plaintext to the ciphertext parameter,
         /// returns the length of the plaintext and counter used in the nonce parameter.
         /// </summary>
-        public int EncryptWithAd(byte[] ad, ReadOnlySequence<byte> plaintexts,Memory<byte> ciphertext, out ulong nonce)
+        public int EncryptWithAd(byte[] ad, IList<ArraySegment<byte>> plaintexts,Memory<byte> ciphertext, out ulong nonce)
         {
             if (n == MaxNonce)
             {
@@ -65,10 +66,11 @@ namespace PortableNoise
             if (k == null)
             {
                 int t = 0;
-                foreach (var plaintext in plaintexts)
+                for(int i = 0; i < plaintexts.Count; i++)
                 {
-                    plaintext.CopyTo(ciphertext.Slice(t));
-                    t += plaintext.Length;
+                    var plaintext = plaintexts[i];
+                    plaintext.Array.AsMemory(plaintext.Offset, plaintext.Count).CopyTo(ciphertext.Slice(t));
+                    t += plaintext.Count;
                 }
                 nonce = n;
                 return t;
@@ -85,7 +87,7 @@ namespace PortableNoise
         /// the length of the ciphertext. If an authentication failure occurs
         /// then n is not incremented and an error is signaled to the caller.
         /// </summary>
-        public int DecryptWithAd(byte[] ad, ReadOnlySequence<byte> ciphertexts, Memory<byte> plaintext)
+        public int DecryptWithAd(byte[] ad, IList<ArraySegment<byte>> ciphertexts, Memory<byte> plaintext)
 		{
 			if (n == MaxNonce)
 			{
@@ -96,10 +98,11 @@ namespace PortableNoise
             if (k == null)
             {
                 int t = 0;
-                foreach (var ciphertext in ciphertexts)
+                for(var i = 0;i < ciphertexts.Count;i++)
                 {
-                    ciphertext.CopyTo(plaintext.Slice(t));
-                    t += ciphertext.Length;
+                    var ciphertext = ciphertexts[i];
+                    ciphertext.Array.AsMemory(ciphertext.Offset, ciphertext.Count).CopyTo(plaintext.Slice(t));
+                    t += ciphertext.Count;
                 }
                 return t;
             }
@@ -116,7 +119,7 @@ namespace PortableNoise
 		/// Otherwise copies the ciphertext to the plaintext parameter and returns
 		/// the length of the ciphertext.
 		/// </summary>
-		public int DecryptWithNonceAndAd(ulong nonce, byte[] ad, ReadOnlySequence<byte> ciphertexts, Memory<byte> plaintext)
+		public int DecryptWithNonceAndAd(ulong nonce, byte[] ad, IList<ArraySegment<byte>> ciphertexts, Memory<byte> plaintext)
 		{
 			if (nonce == MaxNonce)
             {
@@ -127,10 +130,12 @@ namespace PortableNoise
             if (k == null)
             {
                 int t = 0;
-                foreach (var ciphertext in ciphertexts)
+
+                for (var i = 0; i < ciphertexts.Count; i++)
                 {
-                    ciphertext.CopyTo(plaintext.Slice(t));
-                    t += ciphertext.Length;
+                    var ciphertext = ciphertexts[i];
+                    ciphertext.Array.AsMemory(ciphertext.Offset, ciphertext.Count).CopyTo(plaintext.Slice(t));
+                    t += ciphertext.Count;
                 }
                 return t;
             }
@@ -150,7 +155,9 @@ namespace PortableNoise
 
             var key = new byte[Aead.KeySize + Aead.TagSize];
 
-            cipher.Encrypt(k, MaxNonce, zeroLen, new ReadOnlySequence<byte>(zeros), key);
+            var lis = new List<ArraySegment<byte>>();
+            lis.Add(zeros);
+            cipher.Encrypt(k, MaxNonce, zeroLen,lis, key);
 
 			k = k ?? new byte[Aead.KeySize];
             Buffer.BlockCopy(key, Aead.KeySize, k, 0, Aead.TagSize);

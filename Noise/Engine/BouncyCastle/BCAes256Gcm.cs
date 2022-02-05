@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Buffers;
+using System.Linq;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -22,10 +23,10 @@ namespace PortableNoise.Engine.BouncyCastle
     {
 
         GcmBlockCipher cipher = new GcmBlockCipher(new AesEngine());
-        public int Encrypt(byte[] k, ulong n, byte[] ad, ReadOnlySequence<byte> plaintexts, Memory<byte> ciphertext)
+        public int Encrypt(byte[] k, ulong n, byte[] ad, IList<ArraySegment<byte>> plaintexts, Memory<byte> ciphertext)
         {
             Debug.Assert(k.Length == Aead.KeySize);
-            Debug.Assert(ciphertext.Length >= plaintexts.Length + Aead.TagSize);
+            Debug.Assert(ciphertext.Length >= plaintexts.Total() + Aead.TagSize);
 
             var nonce = new byte[Aead.NonceSize];
             BinaryPrimitives.WriteUInt64BigEndian(nonce.AsSpan().Slice(4), n);
@@ -61,11 +62,11 @@ namespace PortableNoise.Engine.BouncyCastle
             }
         }
 
-        public int Decrypt(byte[] k, ulong n, byte[] ad, ReadOnlySequence<byte> ciphertexts, Memory<byte> plaintext)
+        public int Decrypt(byte[] k, ulong n, byte[] ad, IList<ArraySegment<byte>> ciphertexts, Memory<byte> plaintext)
         {
             Debug.Assert(k.Length == Aead.KeySize);
-            Debug.Assert(ciphertexts.Length >= Aead.TagSize);
-            Debug.Assert(plaintext.Length >= ciphertexts.Length - Aead.TagSize);
+            Debug.Assert(ciphertexts.Total() >= Aead.TagSize);
+            Debug.Assert(plaintext.Length >= ciphertexts.Total() - Aead.TagSize);
 
 
             var nonce = new byte[Aead.NonceSize];
